@@ -5,6 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: swagger-json-parser.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/swagger-json-parser.py",
+            "args" : ["--port", "1593"]
+        },
+        {
+            "name": "Python: Current File (External Terminal)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "externalTerminal"
+        },
+        {
             "type": "bashdb",
             "request": "launch",
             "name": "Bash-Debug (hardcoded script name)",
@@ -53,13 +67,6 @@
                 "--no-reload"
             ],
             "jinja": true
-        },
-        {
-            "name": "Python: Current File (External Terminal)",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "externalTerminal"
         }
     ]
 }

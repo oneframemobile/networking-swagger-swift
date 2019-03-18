@@ -1,4 +1,5 @@
 
-     public GenericObjectRequest [FUNC_NAME](final NetworkResponseListener<[RESULT_MODEL_NAME], ErrorModel<String>> listener[FUNC_PARAM]) {
-         return manager.get([QUERY_PATH], listener);
-     }
+ public func get[FUNC_NAME](success:  @escaping (ResultModel<[RESULT_MODEL_NAME]>) -> Void,
+    fail:  @escaping (ErrorModel) -> Void[FUNC_PARAM]) {
+    manager.get([QUERY_PATH],success: success, fail: fail).fetch()
+}
