@@ -39,6 +39,17 @@ class SwaggerFunction(object):
     parameters = []
     resultType = ""
     resultModel = ""
+    # new
+    # if have body
+    bodyFormula = ""
+    # if have path
+    pathFormula = ""
+    # if have query
+    queryFormula = ""
+    # and ???????
+    funcInlineParam = ""
+
+    headerFormula = ""
 
     # The class "constructor" - It's actually an initializer
 
@@ -70,6 +81,8 @@ def swift_TypeConverter(val):
         return "Int"
     elif val == "array":
         return "[]"
+    else:
+        return "String"
 
 
 def func_definitionTypeSplit(val):
@@ -101,7 +114,9 @@ try:
     functions = []
     # pprint(json(jsonData["paths"]))
     for path in jsonData["paths"]:
+        print(path)
         for httpType in jsonData["paths"][path]:
+
             func = make_SwaggerFunction(str(path))
             func.httpMethod = str(httpType)
             func.funcName = str(
@@ -110,11 +125,12 @@ try:
             if jsonData["paths"][path][httpType].has_key('consumes'):
                 if len(jsonData["paths"][path][httpType]["consumes"]) > 0:
                     for requestContentType in jsonData["paths"][path][httpType]["consumes"]:
-                        func.requestContentTypes.append(requestContentType)
+                        func.requestContentTypes.append(
+                            str(requestContentType))
             # response content type var mi?
             if len(jsonData["paths"][path][httpType]["produces"]) > 0:
                 for responseContentType in jsonData["paths"][path][httpType]["produces"]:
-                    func.requestContentTypes.append(responseContentType)
+                    func.requestContentTypes.append(str(responseContentType))
             # paramaters varmi ?
             if str(jsonData["paths"][path][httpType].get("parameters")) != 'None':
                 for parameters in jsonData["paths"][path][httpType]["parameters"]:
@@ -125,25 +141,53 @@ try:
                     requestModel = ""
                     if str(parameters.get("schema")) != 'None':
                         if str(parameters["schema"].get("type")) != 'None':
-                            dataType = str(parameters["schema"]["type"])
+                            dataType = str(parameters["schema"].get("type")) == "array" and str(
+                                parameters["schema"]["type"]) or "String"
                         else:
-                            dataType = "Object"
+                            dataType = "String"
                         if str(parameters.get("schema").get("items")) != 'None':
                             requestModel = func_definitionTypeSplit(
                                 str(parameters.get("schema").get("items").get("$ref")))
+                            if str(parameters.get("schema").get("type")) != "None":
+                                requestModel = str(parameters.get("schema").get(
+                                    "type")) == "array" and arrayConverter(requestModel) or requestModel
                         else:
-                            requestModel = func_definitionTypeSplit(
-                                str(parameters.get("schema").get("$ref")))
+                            if str(parameters.get("schema").get("$ref")) != 'None':
+                                requestModel = func_definitionTypeSplit(
+                                    str(parameters.get("schema").get("$ref")))
+                            else:
+                                requestModel = "String"
+
                     else:
                         dataType = swift_TypeConverter(str(parameters["type"]))
+                        # TODO 1. array ?
                         if str(parameters.get("items")) != 'None':
                             requestModel = arrayConverter(
                                 str(parameters["items"].get("type")))
                         else:
                             requestModel = dataType
+                    if paramType == "body" or paramType == "formData":
+                        func.bodyFormula += len(func.bodyFormula) > 0 and (
+                            ","+name + " : " + requestModel) or name + " : " + requestModel
+                        func.funcInlineParam += len(func.funcInlineParam) > 0 and (
+                            ", " + name + " : " + requestModel) or name + " : " + requestModel
 
-            func.parameters.append(make_SwaggerFunctionParam(
-                name, paramType, required, dataType, requestModel))
+                    elif paramType == "query":
+                        func.queryFormula = func.path.split(
+                            "/")[1] + "?" + name + "= \("+name+")"
+                        func.funcInlineParam = name + " : " + requestModel
+                    elif paramType == "path":
+                        func.pathFormula = func.path.split(
+                            "/")[1] + "/\(" + name + ")"
+                        func.funcInlineParam = name + " : " + requestModel
+                    elif paramType == "header":
+                        func.headerFormula += len(func.bodyFormula) > 0 and (
+                            ","+name + " : " + requestModel) or name + " : " + requestModel
+                        func.funcInlineParam += len(func.funcInlineParam) > 0 and (
+                            ", " + name + " : " + requestModel) or name + " : " + requestModel
+
+                    func.parameters.append(make_SwaggerFunctionParam(
+                        name, paramType, required, dataType, requestModel))
 
             # response model type var mi?
             if len(jsonData["paths"][path][httpType]["responses"]) > 0:
@@ -158,7 +202,7 @@ try:
                                 "[", "").replace("]", "")
                             # TODO i think this trash. because it's sub child have ref param this means ı'm object.
                             if "List" not in definitionTypeUnWrapped:
-                                func.resultType = "Object"
+                                func.resultType = "String"
                             else:
                                 func.resultType = "List"
                         else:
@@ -174,7 +218,7 @@ try:
                                 func.resultType = str(schema.get("type")) == "object" and str(
                                     schema.get("type")) or arrayConverter(schema.get("type"))
                             else:
-                                func.resultType = "Object"
+                                func.resultType = "String"
 
             functions.append(func)
         # pprint(func.funcName, func.httpMethod)
