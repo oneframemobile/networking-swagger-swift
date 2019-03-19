@@ -101,7 +101,6 @@ try:
     functions = []
     # pprint(json(jsonData["paths"]))
     for path in jsonData["paths"]:
-        print("var i")
         for httpType in jsonData["paths"][path]:
             func = make_SwaggerFunction(str(path))
             func.httpMethod = str(httpType)
@@ -157,7 +156,7 @@ try:
                                 definitionTypeSplit)-1]
                             func.resultModel = str(definitionTypeUnWrapped).replace(
                                 "[", "").replace("]", "")
-                                #TODO i think this trash. because it's sub child have ref param this means ı'm object.
+                            # TODO i think this trash. because it's sub child have ref param this means ı'm object.
                             if "List" not in definitionTypeUnWrapped:
                                 func.resultType = "Object"
                             else:
@@ -177,7 +176,7 @@ try:
                             else:
                                 func.resultType = "Object"
 
-        functions.append(func)
+            functions.append(func)
         # pprint(func.funcName, func.httpMethod)
         # for requestContentTypes in jsonData["paths"][path][httpType]["consumes"]):
         #       pprint(requestContentTypes)
