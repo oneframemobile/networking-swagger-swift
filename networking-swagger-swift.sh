@@ -315,7 +315,7 @@ param_url = ""
 param_package = "Networking"
 param_serviceName = ""
 swagger_root_http_url = ""
-JAVA = ".java"
+SWIFT = ".swift"
 MODULES = "networking"
 MODELS = "models"
 SWIFT_ROOT_PATH = "/networking-swagger"
@@ -325,13 +325,13 @@ NETWORKNG_SWAGGER_MANAGER_TEMPLATE = "Networking_swaggger_manager_template"
 # FOR UNIT Test
 NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE = "Networking_swagger_unit_test_class_template"
 IS_ENABLE_UNIT_TEST_GENERATE = False
-manager_filename = "ServiceManager.java"
+manager_filename = "ServiceManager.swift"
 unit_test_filename = "NetworkingInstrumentedTest.java"
 manager_file_content = ""
 unit_test_file_content = ""
 
-SWAGGER_CLIENT_FILEPATH = "src/main/java/io/swagger/client/"
-
+SWAGGER_CLIENT_FILEPATH = "SwaggerClient/Classes/Swaggers/Models/"
+SWAGGER_CLIENT_ROOT_PATH = "SwaggerClient"
 
 last_request_cache_key = ""
 last_request_cache_content = ""
@@ -596,7 +596,7 @@ def createParentModules():
     # ,presenter_filename, view_filename,interactor_filename,wireframe_filename
     global manager_filename, unit_test_filename, manager_file_path
     # NETWORKING SWAGGER MANAGER operations BEGIN
-    manager_filename = MODULES + CODING.SLASH + param_serviceName + manager_filename
+    manager_filename = param_serviceName + manager_filename
     showErrorMessages(MESSAGE.INFO, manager_filename)
     # model manager replacement
     manager_file_content = multiple_replace(getFileContent(
@@ -638,25 +638,18 @@ def createUnitTestModule():
 
 def runSwaggerModelOperations():
     global child_replacement
-    #showErrorMessages(MESSAGE.ERROR,  "hope " + manager_file_path)
-    #print os.getcwd() + CODING.SLASH + SWAGGER_CLIENT_FILEPATH + "model/"
-    oldModelPath = os.getcwd() + CODING.SLASH + SWAGGER_CLIENT_FILEPATH + "model/"
+
+    oldModelPath = os.getcwd() + CODING.SLASH + SWAGGER_CLIENT_FILEPATH
+    swaggerRootPath = os.getcwd() + CODING.SLASH + SWAGGER_CLIENT_ROOT_PATH
     for model in getModelsAndReplacePackage(oldModelPath, param_package):
-        os.rename(oldModelPath + CODING.SLASH + model[0] + JAVA, root_path +
-                  CODING.SLASH + MODULES + CODING.SLASH + MODELS + CODING.SLASH + model[0] + JAVA)
+        os.rename(oldModelPath + CODING.SLASH + model[0] + SWIFT, root_path +
+                  CODING.SLASH  + MODELS + CODING.SLASH + model[0] + SWIFT)
         generatedModels.append(model)
-        #print root_path + CODING.SLASH + MODULES + CODING.SLASH + MODELS + CODING.SLASH + model[0]
-        child_replacement = {"[PACKAGE_NAME]": param_package,
-                             "[MODEL_NAME]": "models" + CODING.DOT + model[0]}
-        childInsertMember(childInnerTemplate=CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE,
-                          insertingModule=manager_file_path, subType=0)
 
     if os.path.isdir(oldModelPath):
         shutil.rmtree(oldModelPath)
-    if os.path.isdir("docs"):
-        shutil.rmtree("docs")
-    if os.path.isdir(os.getcwd() + CODING.SLASH + "src/test"):
-        shutil.rmtree(os.getcwd() + CODING.SLASH + "src/test")
+    if os.path.isdir(swaggerRootPath):
+        shutil.rmtree(swaggerRootPath)
     
 
 
@@ -665,42 +658,39 @@ def getModelsAndReplacePackage(path, packageName):
     subList = os.listdir(path)
     # line split folde rname
     replaceModelPackage(path, packageName, subList)
-    listNew = list(map(lambda x:  re.split('.java', x), subList))
+    listNew = list(map(lambda x:  re.split(SWIFT, x), subList))
     return listNew
 
 
 def getModels(path):
     subList = os.listdir(path)
     # line split folde rname
-    listNew = list(map(lambda x:  re.split('.java', x), subList))
+    listNew = list(map(lambda x:  re.split(SWIFT, x), subList))
     return listNew
 
 
 def replaceModelPackage(path, packageName, subList):
-    packageName = 'package '+packageName + "\n"
+    packageName = 'import '+ packageName + "\n" + 'import Foundation'
     for subItem in subList:
         with open(path+subItem, "r") as file:
             lineDatas = file.readlines()
         # line number
         index = 0
         for line in lineDatas:
-            if line.__contains__('package'):
+            if line.__contains__('import'):
                 lineDatas[index] = packageName
+            
+            if line.__contains__('Codable'):
+                newParentLine = lineDatas[index].replace("Codable","Serializable")
+                lineDatas[index] = newParentLine
 
-            if line.__contains__('import io.swagger.annotations.ApiModel'):
-                lineDatas[index] = ""
-
-            if line.__contains__('@javax.annotation.Generated'):
-                lineDatas[index] = ""
-
-            if line.__contains__('ApiModelProperty'):
-                lineDatas[index] = ""
-
-            if line.__contains__('import io.swagger.client.model'):
-                dotPackageSplit = lineDatas[index].split(".")
-                lineDatas[index] = "import " + param_package + CODING.DOT + MODULES + \
-                    CODING.DOT + MODELS + CODING.DOT + \
-                    dotPackageSplit[len(dotPackageSplit)-1]
+            if line.__contains__('https://github.com/swagger-api/swagger-codegen'):
+                newCommentLine1 = lineDatas[index].replace("https://github.com/swagger-api/swagger-codegen","https://github.com/oneframemobile/networking-swagger-swift")
+                lineDatas[index] = newCommentLine1
+            
+            if line.__contains__('swagger-codegen'):
+                newCommentLine2 = lineDatas[index].replace("swagger-codegen","oneframemobile")
+                lineDatas[index] = newCommentLine2
 
             index += 1
         with open(path+subItem, 'w') as file:
@@ -855,13 +845,13 @@ if len(sys.argv) >= 3:
     unit_test_root_path = os.getcwd() + JAVA_ANDROID_UNIT_TEST_ROOT_PATH
 
     #print root_path
-    replacement = {"[SERVICE_NAME]": param_serviceName, "[PACKAGE_NAME]": param_package, "[URL]": swagger_root_http_url}
+    replacement = {"[SERVICE_NAME]": param_serviceName, "[URL]": swagger_root_http_url}
     # creatae networking-swagger-java folders
     createFolder()
 
-    # swagger-codegen generate -i http://178.211.54.214:5000/swagger/v1/swagger.json -l java -Dmodels,apis --library retrofit2
+    # swagger-codegen generate -i http://petstore.swagger.io/v2/swagger.json -l swift4 -Dmodels
     swagger_codegen_homebrew_cmd = 'swagger-codegen generate -i ' + \
-        param_url + ' -l swift4'
+        param_url + ' -l swift4 -Dmodels'
     os.system(swagger_codegen_homebrew_cmd)
 
     createParentModules()
@@ -870,9 +860,9 @@ if len(sys.argv) >= 3:
 
     # swagger model replace package and move MODELS
     runSwaggerModelOperations()
-    createUnitTestModule()
+    #createUnitTestModule()
 
-    runRetrofitParser()
+    #runRetrofitParser()
 
 else:
     showErrorMessages(

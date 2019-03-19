@@ -1,17 +1,17 @@
 //
 //
 //  Networking-Swagger Code Generate Creater 1.0
-//  [SERVICE_NAME]ServiceManager.swift
+//  TestServiceManager.swift
 //  Copyright © 2019 OneFrame Mobile - Koçsistem All rights reserved.
 //
  
 import Foundation
 import Networking
  
-class [SERVICE_NAME]Manager {
+class TestManager {
     let manager : NetworkManager
     let config = NetworkConfig.shared
-    let URL = "[URL]"
+    let URL = "http://petstore.swagger.io/v2/swagger.json/"
      
     let  RESULT_TAG = ["JSON_KEY"]
     let headerParamters : [String : String] = [

@@ -23,8 +23,8 @@
             "request": "launch",
             "name": "Bash-Debug (hardcoded script name)",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/networking-swagger-java.sh",
-            "args": ["http://178.211.54.214:5000/swagger/v1/swagger.json", "com.oneframe.android", "KocHub"]
+            "program": "${workspaceFolder}/networking-swagger-swift.sh",
+            "args": ["http://petstore.swagger.io/v2/swagger.json", "Test"]
         },
         {
             "name": "Python: Attach",
