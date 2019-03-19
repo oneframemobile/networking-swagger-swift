@@ -41,8 +41,21 @@ class SwaggerFunction(object):
     resultModel = ""
 
     # The class "constructor" - It's actually an initializer
+
     def __init__(self, _path):
+        self.funcName = ""
+        self.httpMethod = ""
+        self.requestContentTypes = []
+        self.responseContentTypes = []
+        self.securityParams = []
+        self.parameters = []
+        self.resultType = ""
+        self.resultModel = ""
         self.path = _path
+
+
+def clear():
+    path = ""
 
 
 def make_SwaggerFunction(_path):
@@ -59,13 +72,18 @@ def swift_TypeConverter(val):
         return "[]"
 
 
-def definitionTypeSplit(val):
+def func_definitionTypeSplit(val):
     _definitionTypeSplit = val.split("/")
     definitionTypeUnWrapped = _definitionTypeSplit[len(
         _definitionTypeSplit)-1]
 
-    return str(definitionTypeUnWrapped).replace(
-        "[", "").replace("]", "")
+    return definitionTypeUnWrapped
+    # return str(definitionTypeUnWrapped).replace(
+    #     "[", "").replace("]", "")
+
+
+def arrayConverter(val):
+    return "["+val+"]"
 
 
 webPath = 'http://petstore.swagger.io/v2/swagger.json'
@@ -83,7 +101,7 @@ try:
     functions = []
     # pprint(json(jsonData["paths"]))
     for path in jsonData["paths"]:
-
+        print("var i")
         for httpType in jsonData["paths"][path]:
             func = make_SwaggerFunction(str(path))
             func.httpMethod = str(httpType)
@@ -99,26 +117,31 @@ try:
                 for responseContentType in jsonData["paths"][path][httpType]["produces"]:
                     func.requestContentTypes.append(responseContentType)
             # paramaters varmi ?
-            if jsonData["paths"][path][httpType].get("parameters") != 'None':
+            if str(jsonData["paths"][path][httpType].get("parameters")) != 'None':
                 for parameters in jsonData["paths"][path][httpType]["parameters"]:
                     name = str(parameters["name"])
                     paramType = str(parameters["in"])
                     required = str(parameters["required"])
                     dataType = ""
                     requestModel = ""
-                    if parameters.get("schema") != 'None':
-                        if parameters["schema"].get("type") != 'None':
+                    if str(parameters.get("schema")) != 'None':
+                        if str(parameters["schema"].get("type")) != 'None':
                             dataType = str(parameters["schema"]["type"])
                         else:
                             dataType = "Object"
-                        requestModel = definitionTypeSplit(str(parameters.get("schema")
-                                                               .get("items").get("$ref")))
+                        if str(parameters.get("schema").get("items")) != 'None':
+                            requestModel = func_definitionTypeSplit(
+                                str(parameters.get("schema").get("items").get("$ref")))
+                        else:
+                            requestModel = func_definitionTypeSplit(
+                                str(parameters.get("schema").get("$ref")))
                     else:
                         dataType = swift_TypeConverter(str(parameters["type"]))
-                        if parameters.get("items") != 'None':
-                            pass
+                        if str(parameters.get("items")) != 'None':
+                            requestModel = arrayConverter(
+                                str(parameters["items"].get("type")))
                         else:
-                            pass
+                            requestModel = dataType
 
             func.parameters.append(make_SwaggerFunctionParam(
                 name, paramType, required, dataType, requestModel))
@@ -126,25 +149,39 @@ try:
             # response model type var mi?
             if len(jsonData["paths"][path][httpType]["responses"]) > 0:
                 if str(jsonData["paths"][path][httpType]["responses"].get("200")) != 'None':
-                    if jsonData["paths"][path][httpType]["responses"]["200"].get("schema") != 'None':
-                        if jsonData["paths"][path][httpType]["responses"]["200"].get("schema").get("$ref") != 'None':
+                    if str(jsonData["paths"][path][httpType]["responses"]["200"].get("schema")) != 'None':
+                        if str(jsonData["paths"][path][httpType]["responses"]["200"].get("schema").get("$ref")) != 'None':
                             definitionTypeSplit = str(jsonData["paths"][path][httpType]["responses"].get(
                                 "200").get("schema").get("$ref")).split("/")
                             definitionTypeUnWrapped = definitionTypeSplit[len(
                                 definitionTypeSplit)-1]
                             func.resultModel = str(definitionTypeUnWrapped).replace(
                                 "[", "").replace("]", "")
+                                #TODO i think this trash. because it's sub child have ref param this means ı'm object.
                             if "List" not in definitionTypeUnWrapped:
                                 func.resultType = "Object"
                             else:
                                 func.resultType = "List"
+                        else:
+                            schema = jsonData["paths"][path][httpType]["responses"]["200"].get(
+                                "schema")
+                            if str(schema.get("$items")) != 'None':
+                                func.resultModel = func_definitionTypeSplit(
+                                    schema.get("$items").get("$ref"))
+                            else:
+                                func.resultModel = str(schema.get(
+                                    "$ref")) != 'None' and func_definitionTypeSplit(schema.get("$ref")) or ""
+                            if str(schema.get("type")) != 'None':
+                                func.resultType = str(schema.get("type")) == "object" and str(
+                                    schema.get("type")) or arrayConverter(schema.get("type"))
+                            else:
+                                func.resultType = "Object"
 
-            functions.append(func)
-
-            #pprint(func.funcName, func.httpMethod)
-            # for requestContentTypes in jsonData["paths"][path][httpType]["consumes"]):
-            #       pprint(requestContentTypes)
-            #  break
+        functions.append(func)
+        # pprint(func.funcName, func.httpMethod)
+        # for requestContentTypes in jsonData["paths"][path][httpType]["consumes"]):
+        #       pprint(requestContentTypes)
+        #  break
         #    break
     print(len(functions))
 # with open(last.strip(), 'wb') as fl:
