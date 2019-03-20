@@ -1,5 +1,5 @@
 
- public func get[FUNC_NAME](success:  @escaping (ResultModel<[RESULT_MODEL_NAME]>) -> Void,
-    fail:  @escaping (ErrorModel) -> Void[FUNC_PARAM]) {
+ public func [FUNC_NAME]([FUNC_PARAM]success:  @escaping (ResultModel<[RESULT_MODEL_NAME]>) -> Void,
+    fail:  @escaping (ErrorModel) -> Void) {
     manager.get([QUERY_PATH],success: success, fail: fail).fetch()
 }
