@@ -171,7 +171,6 @@ try:
                             ","+name + " : " + requestModel) or name + " : " + requestModel
                         func.funcInlineParam += len(func.funcInlineParam) > 0 and (
                             ", " + name + " : " + requestModel) or name + " : " + requestModel
-
                     elif paramType == "query":
                         func.queryFormula = func.path.split(
                             "/")[1] + "?" + name + "= \("+name+")"
@@ -185,7 +184,6 @@ try:
                             ","+name + " : " + requestModel) or name + " : " + requestModel
                         func.funcInlineParam += len(func.funcInlineParam) > 0 and (
                             ", " + name + " : " + requestModel) or name + " : " + requestModel
-
                     func.parameters.append(make_SwaggerFunctionParam(
                         name, paramType, required, dataType, requestModel))
 
@@ -213,10 +211,9 @@ try:
                                     schema.get("$items").get("$ref"))
                             else:
                                 func.resultModel = str(schema.get(
-                                    "$ref")) != 'None' and func_definitionTypeSplit(schema.get("$ref")) or ""
+                                    "$ref")) != 'None' and func_definitionTypeSplit(schema.get("$ref")) or "String"
                             if str(schema.get("type")) != 'None':
-                                func.resultType = str(schema.get("type")) == "object" and str(
-                                    schema.get("type")) or arrayConverter(schema.get("type"))
+                                func.resultType = str(schema.get("type")) == "object" and "String" or arrayConverter(str(schema.get("type")))
                             else:
                                 func.resultType = "String"
 
