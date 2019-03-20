@@ -2,8 +2,7 @@ import json
 import requests
 import os
 import urllib2
-
-from pprint import pprint
+import json
 
 
 class SwaggerFunctionParam(object):
@@ -176,8 +175,19 @@ try:
                             "/")[1] + "?" + name + "= \("+name+")"
                         func.funcInlineParam = name + " : " + requestModel
                     elif paramType == "path":
-                        func.pathFormula = func.path.split(
-                            "/")[1] + "/\(" + name + ")"
+                        isCenter = func.path.index("}") + \
+                                1 != len(func.path)
+                        if isCenter:
+                            regexString = "\" + "+name+" + \""
+                        else:
+                            regexString ="\" + "+name
+                        # regexString = "\"+"+name+"+\""
+
+                        func.pathFormula = func.path.replace(
+                            "{"+name+"}", regexString)
+                        func.pathFormula ="\""+func.pathFormula
+                        if isCenter:
+                            func.pathFormula += "\""
                         func.funcInlineParam = name + " : " + requestModel
                     elif paramType == "header":
                         func.headerFormula += len(func.bodyFormula) > 0 and (
@@ -213,7 +223,8 @@ try:
                                 func.resultModel = str(schema.get(
                                     "$ref")) != 'None' and func_definitionTypeSplit(schema.get("$ref")) or "String"
                             if str(schema.get("type")) != 'None':
-                                func.resultType = str(schema.get("type")) == "object" and "String" or arrayConverter(str(schema.get("type")))
+                                func.resultType = str(schema.get(
+                                    "type")) == "object" and "String" or arrayConverter(str(schema.get("type")))
                             else:
                                 func.resultType = "String"
 
@@ -224,6 +235,7 @@ try:
         #  break
         #    break
     print(len(functions))
+
 # with open(last.strip(), 'wb') as fl:
     # fl.write(resp.read())
 except urllib2.HTTPError as e:
