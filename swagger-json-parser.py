@@ -143,7 +143,7 @@ try:
                     dataType = ""
                     requestModel = ""
 
-                    # if we have schema property will use type and 
+                    # if we have schema property will use type and other values
                     if str(parameters.get("schema")) != 'None':
                         if str(parameters["schema"].get("type")) != 'None':
                             dataType = str(parameters["schema"].get("type")) == "array" and str(
@@ -174,7 +174,6 @@ try:
                     if paramType == "body" or paramType == "formData":
                         func.bodyFormula += len(func.bodyFormula) > 0 and (
                             ","+name + " : " + requestModel) or name + " : " + requestModel
-
                     elif paramType == "query":
                         if "?" in func.queryFormula:
                             func.queryFormula += "&"+name+"=\("+name+")"

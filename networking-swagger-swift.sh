@@ -728,24 +728,24 @@ def runFuncSwaggerGenerator(Functions):
             child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel,
                                  "[QUERY_PATH]": func.queryFormula == "" and func.pathFormula or func.queryFormula,
                                  "[FUNC_PARAM]": func.funcInlineParam}
-            if func.funcName == "findPetsByTags":
-                print(func)
             childInsertMember(childInnerTemplate=CHILD_MANAGER_GET_FUNC_TEMPLATE,
                               insertingModule=manager_file_path, subType=1)
             generateApiFuncCount = generateApiFuncCount + 1
-        '''
-        elif intern(func.api.method) is intern("POST"):
-            if hasInlineParam == True:
-                child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
-                ), "[FUNC_PARAM]": funcInlineParam, "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
-            else:
-                child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
-                ), "[FUNC_PARAM]": "", "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
+
+        elif intern(func.httpMethod) is intern("post"):
+
+            # child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.resultModel, "[QUERY_PATH]": func.queryFormula ==
+            #                      "" and func.pathFormula or func.queryFormula, "[FUNC_PARAM]": func.funcInlineParam, "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
+            child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel, "[QUERY_PATH]": func.queryFormula ==
+                                 "" and func.pathFormula or func.queryFormula, "[FUNC_PARAM]": func.funcInlineParam}        
+            # else:
+            #     child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
+            #     ), "[FUNC_PARAM]": "", "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
             childInsertMember(childInnerTemplate=CHILD_MANAGER_POST_FUNC_TEMPLATE,
                               insertingModule=manager_file_path, subType=1)
             generateApiFuncCount = generateApiFuncCount + 1
         generateApiFuncCount = generateApiFuncCount + 1
-        '''
+
         # print func.funcName
 
     showErrorMessages(MESSAGE.INFO, str(
