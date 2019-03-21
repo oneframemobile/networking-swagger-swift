@@ -2,7 +2,7 @@
 """:"
 exec python $0 ${1+"$@"}
 """
-#import requests
+# import requests
 import os
 import sys
 import re
@@ -12,9 +12,8 @@ import shutil
 import json
 
 
-
 # 1.0.0
-#networking-swagger-java -url -package -serviceName -resultJsonKey
+# networking-swagger-java -url -package -serviceName -resultJsonKey
 # swagger json -parser classes
 
 class SwaggerFunctionParam(object):
@@ -49,8 +48,8 @@ class SwaggerFunction(object):
     securityParams = []
     parameters = []
     resultType = ""
-    resultModel = ""
-    # new
+    resultModel = "String"
+
     # if have body
     bodyFormula = ""
     # if have path
@@ -109,9 +108,10 @@ def func_definitionTypeSplit(val):
 def arrayConverter(val):
     return "["+swift_TypeConverter(val)+"]"
 
+
 def getSwaggerFunctionInfo(swaggerWebUrl):
     functions = []
-    #webPath = 'http://petstore.swagger.io/v2/swagger.json'
+    # webPath = 'http://petstore.swagger.io/v2/swagger.json'
     # 'http://178.211.54.214:5000/swagger/v1/swagger.json'
     # swagger-codegen generate -i http://petstore.swagger.io/v2/swagger.json -l swift4
     try:
@@ -123,7 +123,7 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
         resp = urllib2.urlopen(swaggerWebUrl)
         dataString = resp.read().decode('utf-8')
         jsonData = json.loads(dataString)
-    
+
         # pprint(json(jsonData["paths"]))
         for path in jsonData["paths"]:
             print(path)
@@ -142,9 +142,10 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                 # response content type var mi?
                 if len(jsonData["paths"][path][httpType]["produces"]) > 0:
                     for responseContentType in jsonData["paths"][path][httpType]["produces"]:
-                        func.requestContentTypes.append(str(responseContentType))
+                        func.requestContentTypes.append(
+                            str(responseContentType))
                 # paramaters varmi ?
-                if str(jsonData["paths"][path][httpType].get("parameters")) != 'None':
+                if str(jsonData["paths"][path][httpType].get("parameters")) != 'None' and len(jsonData["paths"][path][httpType].get("parameters")) > 0:
                     for parameters in jsonData["paths"][path][httpType]["parameters"]:
                         name = str(parameters["name"])
                         paramType = str(parameters["in"])
@@ -171,7 +172,8 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                                     requestModel = "String"
 
                         else:
-                            dataType = swift_TypeConverter(str(parameters["type"]))
+                            dataType = swift_TypeConverter(
+                                str(parameters["type"]))
                             # TODO 1. array ?
                             if str(parameters.get("items")) != 'None':
                                 requestModel = arrayConverter(
@@ -181,36 +183,35 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                         if paramType == "body" or paramType == "formData":
                             func.bodyFormula += len(func.bodyFormula) > 0 and (
                                 ","+name + " : " + requestModel) or name + " : " + requestModel
-                            func.funcInlineParam += len(func.funcInlineParam) > 0 and (
-                                ", " + name + " : " + requestModel) or name + " : " + requestModel
                         elif paramType == "query":
-                            func.queryFormula = func.path.split(
-                                "/")[1] + "?" + name + "= \("+name+")"
-                            func.funcInlineParam = name + " : " + requestModel
-                        elif paramType == "path":
-                            isCenter = func.path.index("}") + \
-                                    1 != len(func.path)
-                            if isCenter:
-                                regexString = "\" + "+name+" + \""
+                            if "?" in func.queryFormula:
+                                func.queryFormula += "&"+name+"=\("+name+")"
                             else:
-                                regexString ="\" + "+name
-                            # regexString = "\"+"+name+"+\""
-
+                                func.queryFormula = func.path + \
+                                    "?"+name+"=\("+name+")"
+                        elif paramType == "path":
                             func.pathFormula = func.path.replace(
-                                "{"+name+"}", regexString)
-                            func.pathFormula ="\""+func.pathFormula
-                            if isCenter:
-                                func.pathFormula += "\""
-                            func.funcInlineParam = name + " : " + requestModel
+                                "{"+name+"}", ("\("+name+")"))
+                            func.pathFormula = "\""+func.pathFormula+"\""
                         elif paramType == "header":
                             func.headerFormula += len(func.bodyFormula) > 0 and (
                                 ","+name + " : " + requestModel) or name + " : " + requestModel
-                            func.funcInlineParam += len(func.funcInlineParam) > 0 and (
-                                ", " + name + " : " + requestModel) or name + " : " + requestModel
+                        else:
+                            func.pathFormula = "\""+func.pathFormula+"\""
+                        if name != "":
+                            if func.funcInlineParam == "":
+                                func.funcInlineParam = name + ": " + requestModel
+                            else:
+                                func.funcInlineParam += ", " + name + ": " + requestModel
                         func.parameters.append(make_SwaggerFunctionParam(
                             name, paramType, required, dataType, requestModel))
 
-                # response model type var mi?
+                    if func.funcInlineParam != "":
+                        func.funcInlineParam += ", "
+                    if func.queryFormula != "":
+                        func.queryFormula = "\""+func.queryFormula+"\""
+                else:
+                    func.pathFormula = "\""+func.path+"\""
                 if len(jsonData["paths"][path][httpType]["responses"]) > 0:
                     if str(jsonData["paths"][path][httpType]["responses"].get("200")) != 'None':
                         if str(jsonData["paths"][path][httpType]["responses"]["200"].get("schema")) != 'None':
@@ -240,14 +241,14 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                                         "type")) == "object" and "String" or arrayConverter(str(schema.get("type")))
                                 else:
                                     func.resultType = "String"
-
+                func.resultModel = swift_TypeConverter(func.resultModel)
                 functions.append(func)
             # pprint(func.funcName, func.httpMethod)
             # for requestContentTypes in jsonData["paths"][path][httpType]["consumes"]):
             #       pprint(requestContentTypes)
             #  break
             #    break
-        #print(len(functions))
+        # print(len(functions))
         return functions
     # with open(last.strip(), 'wb') as fl:
         # fl.write(resp.read())
@@ -258,7 +259,8 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
     except Exception as e:
         print('generic exception: ' + str(e))
 
-#end swagger json -parser classes
+# end swagger json -parser classes
+
 
 def constant(f):
     def fset(self, value):
@@ -374,9 +376,9 @@ manager_file_path = ''
 unit_test_file_path = ''
 
 sub_module_type = '-s'
-#folders = [WIREFRAME, INTERACTOR, VIEW ,PRESENTER, PROTOCOLS ]
+# folders = [WIREFRAME, INTERACTOR, VIEW ,PRESENTER, PROTOCOLS ]
 # CURRENT_DEV_ENV LOCAL OR ONLINE(Github)
-#CURRENT_DEV_ENV = DEV_ENV.ONLINE
+# CURRENT_DEV_ENV = DEV_ENV.ONLINE
 CURRENT_DEV_ENV = DEV_ENV.LOCAL
 SWIFT = ".swift"
 model_package = "//{{model_package}}"
@@ -433,10 +435,10 @@ def createFolder():
         os.makedirs(root_path)
         showErrorMessages(MESSAGE.INFO, root_path)
 
-    #MODELS
+    # MODELS
 
-    #print root_path + CODING.SLASH + MODULES
-    if not os.path.isdir(root_path + CODING.SLASH  + MODELS):
+    # print root_path + CODING.SLASH + MODULES
+    if not os.path.isdir(root_path + CODING.SLASH + MODELS):
         os.makedirs(root_path + CODING.SLASH + MODELS)
         showErrorMessages(MESSAGE.INFO, root_path +
                           CODING.SLASH + MODELS)
@@ -449,10 +451,10 @@ def createFolder():
         showErrorMessages(MESSAGE.INFO, unit_test_root_path +
                           CODING.SLASH + package_path)
     '''
-        # for folder in folders:
-        #
-        #	if not os.path.isdir(root_path + folder):
-        #		os.makedirs(root_path + folder)
+    # for folder in folders:
+    #
+    #	if not os.path.isdir(root_path + folder):
+    #		os.makedirs(root_path + folder)
 
 
 def validateParentModulePath():
@@ -501,7 +503,7 @@ def getFileContent(file):
     else:
         try:
             if intern(last_request_cache_key) is intern(file):
-                #print "cached data : " + file
+                # print "cached data : " + file
                 return last_request_cache_content
             gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
             data = urllib2.urlopen(file, context=gcontext).read(20000)
@@ -518,10 +520,10 @@ def getFileContent(file):
 
 
 def replaceAndCreateCodingContent(template_file):
-    #print template_file
+    # print template_file
     temp_file_content = multiple_replace(
         getFileContent(template_file),  child_replacement)
-    #print "content " + template_file
+    # print "content " + template_file
     return temp_file_content
 
 
@@ -531,8 +533,8 @@ def insertOtherString(source_str, insert_str, pos):
 
 def childInsertMember(childInnerTemplate, insertingModule, subType):
     templateDataPath = insertingModule
-    
-    #showErrorMessages(MESSAGE.ERROR,  "childInsertMember " + templateDataPath)
+
+    # showErrorMessages(MESSAGE.ERROR,  "childInsertMember " + templateDataPath)
     # TODO REMOVE
     # UNIT TEST CLASSI KOMPLE REMOVE
     # if subType == 2:
@@ -547,8 +549,8 @@ def childInsertMember(childInnerTemplate, insertingModule, subType):
     data = open(templateDataPath, "r").read(500000)
 
     # if subType == 2:
-    #print "data : " + generic_child_inner_template_content
-    #import package
+    # print "data : " + generic_child_inner_template_content
+    # import package
     if subType == 0:
         subTypeString = model_package
         child_inner_index = str(data.strip()).index(
@@ -572,16 +574,16 @@ def childInsertMember(childInnerTemplate, insertingModule, subType):
 
 
 def removeChildContent(childInnerTemplate, removingModule):
-    #templateDataPath =  os.getcwd() + SWIFT_ROOT_PATH + package_path + CODING.SLASH  + removingModule
+    # templateDataPath =  os.getcwd() + SWIFT_ROOT_PATH + package_path + CODING.SLASH  + removingModule
     templateDataPath = removingModule
     generic_child_inner_template_content = replaceAndCreateCodingContent(
         childInnerTemplate)
-    #print generic_child_inner_template_content
+    # print generic_child_inner_template_content
     data = open(templateDataPath, "r").read(500000)
     remove_child_replacement = {generic_child_inner_template_content: ""}
     remove_replace_content = data.strip().replace(
         generic_child_inner_template_content, "")
-    #print remove_replace_content
+    # print remove_replace_content
     appendFile(fileName=templateDataPath,
                content=remove_replace_content, isTruncate=True)
 
@@ -616,7 +618,7 @@ def createParentModules():
     # model manager replacement
     manager_file_content = multiple_replace(getFileContent(
         NETWORKNG_SWAGGER_MANAGER_TEMPLATE),  replacement)
-    #print manager_file_content
+    # print manager_file_content
     # manager file create
     manager_file_path = root_path + CODING.SLASH + manager_filename
 
@@ -624,7 +626,10 @@ def createParentModules():
     createFile(manager_file_path, manager_file_content)
     # NETWORKING SWAGGER MANAGER operations END
 
+
 generatedModels = []
+
+
 def createUnitTestModule():
     global unit_test_filename, unit_test_file_content, replacement, child_replacement, unit_test_file_path, NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE
     if IS_ENABLE_UNIT_TEST_GENERATE == True:
@@ -640,15 +645,13 @@ def createUnitTestModule():
         createFile(unit_test_file_path, unit_test_file_content)
 
         oldModelPath = root_path + CODING.SLASH + MODULES + CODING.SLASH + MODELS
-        #print oldModelPath
+        # print oldModelPath
         for model in generatedModels:
-            #print root_path + CODING.SLASH + MODULES + CODING.SLASH + MODELS + CODING.SLASH + model[0]
+            # print root_path + CODING.SLASH + MODULES + CODING.SLASH + MODELS + CODING.SLASH + model[0]
             child_replacement = {"[PACKAGE_NAME]": param_package,
                                  "[MODEL_NAME]": "models" + CODING.DOT + model[0]}
             childInsertMember(childInnerTemplate=CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE,
                               insertingModule=unit_test_file_path, subType=0)
-        
-            
 
 
 def runSwaggerModelOperations():
@@ -658,14 +661,13 @@ def runSwaggerModelOperations():
     swaggerRootPath = os.getcwd() + CODING.SLASH + SWAGGER_CLIENT_ROOT_PATH
     for model in getModelsAndReplacePackage(oldModelPath, param_package):
         os.rename(oldModelPath + CODING.SLASH + model[0] + SWIFT, root_path +
-                  CODING.SLASH  + MODELS + CODING.SLASH + model[0] + SWIFT)
+                  CODING.SLASH + MODELS + CODING.SLASH + model[0] + SWIFT)
         generatedModels.append(model)
 
     if os.path.isdir(oldModelPath):
         shutil.rmtree(oldModelPath)
     if os.path.isdir(swaggerRootPath):
         shutil.rmtree(swaggerRootPath)
-    
 
 
 def getModelsAndReplacePackage(path, packageName):
@@ -685,7 +687,7 @@ def getModels(path):
 
 
 def replaceModelPackage(path, packageName, subList):
-    packageName = 'import '+ packageName + "\n" + 'import Foundation'
+    packageName = 'import ' + packageName + "\n" + 'import Foundation'
     for subItem in subList:
         with open(path+subItem, "r") as file:
             lineDatas = file.readlines()
@@ -694,17 +696,20 @@ def replaceModelPackage(path, packageName, subList):
         for line in lineDatas:
             if line.__contains__('import'):
                 lineDatas[index] = packageName
-            
+
             if line.__contains__('Codable'):
-                newParentLine = lineDatas[index].replace("Codable","Serializable")
+                newParentLine = lineDatas[index].replace(
+                    "Codable", "Serializable")
                 lineDatas[index] = newParentLine
 
             if line.__contains__('https://github.com/swagger-api/swagger-codegen'):
-                newCommentLine1 = lineDatas[index].replace("https://github.com/swagger-api/swagger-codegen","https://github.com/oneframemobile/networking-swagger-swift")
+                newCommentLine1 = lineDatas[index].replace(
+                    "https://github.com/swagger-api/swagger-codegen", "https://github.com/oneframemobile/networking-swagger-swift")
                 lineDatas[index] = newCommentLine1
-            
+
             if line.__contains__('swagger-codegen'):
-                newCommentLine2 = lineDatas[index].replace("swagger-codegen","oneframemobile")
+                newCommentLine2 = lineDatas[index].replace(
+                    "swagger-codegen", "oneframemobile")
                 lineDatas[index] = newCommentLine2
 
             index += 1
@@ -716,12 +721,15 @@ def runFuncSwaggerGenerator(Functions):
     global child_replacement
     generateApiFuncCount = 0
     for func in Functions:
-        
+
         if intern(func.httpMethod) is intern("get"):
-            showErrorMessages(MESSAGE.INFO,  func.funcName + " api func generating...")
-            child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel == "" and "String" or func.resultModel,
-                                     "[QUERY_PATH]": "path : " + func.path + " queryFormula : " + func.queryFormula + " pathFormula : " + func.pathFormula,
-                                     "[FUNC_PARAM]": func.funcInlineParam == "" and "" or func.funcInlineParam + ","}
+            showErrorMessages(MESSAGE.INFO,  func.funcName +
+                              " api func generating...")
+            child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel,
+                                 "[QUERY_PATH]": func.queryFormula == "" and func.pathFormula or func.queryFormula,
+                                 "[FUNC_PARAM]": func.funcInlineParam}
+            if func.funcName == "findPetsByTags":
+                print(func)
             childInsertMember(childInnerTemplate=CHILD_MANAGER_GET_FUNC_TEMPLATE,
                               insertingModule=manager_file_path, subType=1)
             generateApiFuncCount = generateApiFuncCount + 1
@@ -738,10 +746,11 @@ def runFuncSwaggerGenerator(Functions):
             generateApiFuncCount = generateApiFuncCount + 1
         generateApiFuncCount = generateApiFuncCount + 1
         '''
-        #print func.funcName
+        # print func.funcName
 
     showErrorMessages(MESSAGE.INFO, str(
         generateApiFuncCount) + " api func generated")
+
 
 def runRetrofitParser():
     generateApiFuncCount = 0
@@ -759,7 +768,7 @@ def runRetrofitParser():
             generateApiFuncCount += generateNetworkingFunc(clazz.functions)
             if IS_ENABLE_UNIT_TEST_GENERATE == True:
                 generateUnitTestFunc(clazz.functions)
-    #print len(clazz.functions)
+    # print len(clazz.functions)
     '''
     public GenericObjectRequest [FUNC_NAME](final NetworkResponseListener<[RESULT_MODEL_NAME], ServiceErrorModel> listener) {
          return manager.get("[QUERY_PATH]", listener);
@@ -768,7 +777,7 @@ def runRetrofitParser():
        return manager.post("[QUERY_PATH]", model, listener);
      }
     '''
-    #print clazz.functions[0].querypath()
+    # print clazz.functions[0].querypath()
     showErrorMessages(MESSAGE.INFO, str(
         generateApiFuncCount) + " api func generated")
     if os.path.isdir(oldApiPath):
@@ -789,16 +798,16 @@ def generateNetworkingFunc(Functions):
         funcBodyInlineParam = ""
         if len(func.parameters) > 0:
             for param in func.parameters:
-                #print param.name + " " + param.clazz + " type : " + param.annotation
+                # print param.name + " " + param.clazz + " type : " + param.annotation
                 if param.annotation == "Query" or param.annotation == "Path":
                     hasInlineParam = True
                     funcInlineParam += "," + param.clazz + " " + param.name
                 if param.annotation == "Body":
                     funcBodyInlineParam = param.clazz
-            #print param.name + " " + param.clazz + " type : " + param.annotation
-            #print func.bodyparameter
+            # print param.name + " " + param.clazz + " type : " + param.annotation
+            # print func.bodyparameter
 
-#print func.name + " " + func.api.method + " " + func.api.address + " " + func.response + " " + func.querypath()
+# print func.name + " " + func.api.method + " " + func.api.address + " " + func.response + " " + func.querypath()
 # GET FUNC
         if intern(func.api.method) is intern("GET"):
             if hasInlineParam == True:
@@ -826,13 +835,13 @@ def generateNetworkingFunc(Functions):
 def generateUnitTestFunc(Functions):
     global child_replacement, unit_test_file_path
     for func in Functions:
-        #showErrorMessages(MESSAGE.INFO,  func.name + " unit test func generating...")
+        # showErrorMessages(MESSAGE.INFO,  func.name + " unit test func generating...")
         hasInlineParam = False
         funcInlineParam = ""
         funcBodyInlineParam = ""
         if len(func.parameters) > 0:
             for param in func.parameters:
-                #print param.name + " " + param.clazz + " type : " + param.annotation
+                # print param.name + " " + param.clazz + " type : " + param.annotation
                 if param.annotation == "Query" or param.annotation == "Path":
                     hasInlineParam = True
                     if intern(str(param.clazz)) is intern("String"):
@@ -845,16 +854,16 @@ def generateUnitTestFunc(Functions):
                         funcInlineParam += "," + "1F"
                 if param.annotation == "Body":
                     funcBodyInlineParam = param.clazz
-            #print param.name + " " + param.clazz + " type : " + param.annotation
-            #print func.bodyparameter
+            # print param.name + " " + param.clazz + " type : " + param.annotation
+            # print func.bodyparameter
 
-#print func.name + " " + func.api.method + " " + func.api.address + " " + func.response + " " + func.querypath()
+# print func.name + " " + func.api.method + " " + func.api.address + " " + func.response + " " + func.querypath()
 # GET FUNC
 # '''
         if intern(func.api.method) is intern("GET"):
 
             if hasInlineParam == True:
-                #showErrorMessages(MESSAGE.ERROR,"funcInlineParam : " + funcInlineParam)
+                # showErrorMessages(MESSAGE.ERROR,"funcInlineParam : " + funcInlineParam)
                 child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response,
                                      "[SERVICE_NAME]": param_serviceName, "[FUNC_PARAM]": funcInlineParam}
             else:
@@ -863,6 +872,7 @@ def generateUnitTestFunc(Functions):
             childInsertMember(childInnerTemplate=CHILD_UNIT_TEST_GET_FUNC_TEMPLATE,
                               insertingModule=unit_test_file_path, subType=2)
         elif intern(func.api.method) is intern("POST"):
+            print("aa")
             if hasInlineParam == True:
                 child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
                 ), "[FUNC_PARAM]": funcInlineParam, "[REQUEST_MODEL_NAME]": funcBodyInlineParam, "[SERVICE_NAME]": param_serviceName}
@@ -874,10 +884,10 @@ def generateUnitTestFunc(Functions):
 
 
 # coding start
-#networking-swagger -url -serviceName
+# networking-swagger -url -serviceName
 if len(sys.argv) >= 3:
     param_url = str(sys.argv[1])
-    #param_package = str(sys.argv[2])
+    # param_package = str(sys.argv[2])
     param_serviceName = str(sys.argv[2])
     # http swagger url content print len(swagger_root_http_url.split('http'))
     for url_split_path in param_url.split(CODING.SLASH):
@@ -890,8 +900,9 @@ if len(sys.argv) >= 3:
     root_path = os.getcwd() + SWIFT_ROOT_PATH
     unit_test_root_path = os.getcwd() + JAVA_ANDROID_UNIT_TEST_ROOT_PATH
 
-    #print root_path
-    replacement = {"[SERVICE_NAME]": param_serviceName, "[URL]": swagger_root_http_url}
+    # print root_path
+    replacement = {"[SERVICE_NAME]": param_serviceName,
+                   "[URL]": swagger_root_http_url}
     # creatae networking-swagger-java folders
     createFolder()
 
@@ -902,18 +913,17 @@ if len(sys.argv) >= 3:
 
     createParentModules()
     IS_ENABLE_UNIT_TEST_GENERATE = False
-    
 
     # swagger model replace package and move MODELS
     runSwaggerModelOperations()
-    #createUnitTestModule()
+    # createUnitTestModule()
 
     swaggerFunctions = getSwaggerFunctionInfo(param_url)
     if swaggerFunctions.count > 0:
         runFuncSwaggerGenerator(swaggerFunctions)
-    else :
+    else:
         showErrorMessages(MESSAGE.ERROR, "Swagger Functions not found")
-   
+
 
 else:
     showErrorMessages(
@@ -941,7 +951,7 @@ else:
         showErrorMessages(MESSAGE.ERROR,"-typeName command is not correct")
         showErrorMessages(MESSAGE.ERROR,"for parent module is use to -p , for sub module is use to -s")
 '''
-#os.system("rm -rf " + param)
+# os.system("rm -rf " + param)
 # showErrorMessages(MESSAGE.SUCCESS,"child")
 # os.path.isdir("/home/el")
-#print type(protocol_file_content)
+# print type(protocol_file_content)

@@ -38,6 +38,8 @@ class SwaggerFunction(object):
     parameters = []
     resultType = ""
     resultModel = ""
+
+    requestFormula = ""
     # new
     # if have body
     bodyFormula = ""
@@ -45,9 +47,10 @@ class SwaggerFunction(object):
     pathFormula = ""
     # if have query
     queryFormula = ""
-    # and ???????
+    # function body param
     funcInlineParam = ""
 
+    #  it's doesn't use now like bodyformula
     headerFormula = ""
 
     # The class "constructor" - It's actually an initializer
@@ -74,6 +77,7 @@ def make_SwaggerFunction(_path):
 
 
 def swift_TypeConverter(val):
+    #python veriable syntax convert swift syntax
     if val == "string":
         return "String"
     elif val == "integer":
@@ -85,17 +89,16 @@ def swift_TypeConverter(val):
 
 
 def func_definitionTypeSplit(val):
+    # need model name so use split definition path
     _definitionTypeSplit = val.split("/")
     definitionTypeUnWrapped = _definitionTypeSplit[len(
         _definitionTypeSplit)-1]
-
     return definitionTypeUnWrapped
-    # return str(definitionTypeUnWrapped).replace(
-    #     "[", "").replace("]", "")
 
 
 def arrayConverter(val):
-    return "["+val+"]"
+    # any model or primitive type convert array synax.
+    return "["+swift_TypeConverter(val)+"]"
 
 
 webPath = 'http://petstore.swagger.io/v2/swagger.json'
@@ -131,13 +134,16 @@ try:
                 for responseContentType in jsonData["paths"][path][httpType]["produces"]:
                     func.requestContentTypes.append(str(responseContentType))
             # paramaters varmi ?
-            if str(jsonData["paths"][path][httpType].get("parameters")) != 'None':
+            # if i have paramaters but could paramaters is empty for add len conrol.
+            if str(jsonData["paths"][path][httpType].get("parameters")) != 'None' and len(jsonData["paths"][path][httpType].get("parameters")) >0:
                 for parameters in jsonData["paths"][path][httpType]["parameters"]:
                     name = str(parameters["name"])
                     paramType = str(parameters["in"])
                     required = str(parameters["required"])
                     dataType = ""
                     requestModel = ""
+
+                    # if we have schema property will use type and 
                     if str(parameters.get("schema")) != 'None':
                         if str(parameters["schema"].get("type")) != 'None':
                             dataType = str(parameters["schema"].get("type")) == "array" and str(
@@ -168,35 +174,38 @@ try:
                     if paramType == "body" or paramType == "formData":
                         func.bodyFormula += len(func.bodyFormula) > 0 and (
                             ","+name + " : " + requestModel) or name + " : " + requestModel
-                        func.funcInlineParam += len(func.funcInlineParam) > 0 and (
-                            ", " + name + " : " + requestModel) or name + " : " + requestModel
-                    elif paramType == "query":
-                        func.queryFormula = func.path.split(
-                            "/")[1] + "?" + name + "= \("+name+")"
-                        func.funcInlineParam = name + " : " + requestModel
-                    elif paramType == "path":
-                        isCenter = func.path.index("}") + \
-                                1 != len(func.path)
-                        if isCenter:
-                            regexString = "\" + "+name+" + \""
-                        else:
-                            regexString ="\" + "+name
-                        # regexString = "\"+"+name+"+\""
 
+                    elif paramType == "query":
+                        if "?" in func.queryFormula:
+                            func.queryFormula += "&"+name+"=\("+name+")"
+                        else:
+                            func.queryFormula = func.path + \
+                                "?"+name+"=\("+name+")"
+                    elif paramType == "path":
                         func.pathFormula = func.path.replace(
-                            "{"+name+"}", regexString)
-                        func.pathFormula ="\""+func.pathFormula
-                        if isCenter:
-                            func.pathFormula += "\""
-                        func.funcInlineParam = name + " : " + requestModel
+                            "{"+name+"}", ("\("+name+")"))
+                        func.pathFormula = "\""+func.pathFormula+"\""
+
                     elif paramType == "header":
                         func.headerFormula += len(func.bodyFormula) > 0 and (
                             ","+name + " : " + requestModel) or name + " : " + requestModel
-                        func.funcInlineParam += len(func.funcInlineParam) > 0 and (
-                            ", " + name + " : " + requestModel) or name + " : " + requestModel
+                    else :
+                        func.pathFormula = "\""+func.pathFormula+"\""
+                    if name != "":
+                        if func.funcInlineParam == "":
+                            func.funcInlineParam = name + ": " + requestModel
+                        else:
+                            func.funcInlineParam += ", " + name + ": " + requestModel
                     func.parameters.append(make_SwaggerFunctionParam(
                         name, paramType, required, dataType, requestModel))
-
+                
+                # last character add ,
+                if func.funcInlineParam != "":
+                    func.funcInlineParam += ", "
+                if func.queryFormula != "":
+                    func.queryFormula = "\""+func.queryFormula+"\""
+            else: 
+                func.pathFormula = "\""+func.path+"\""
             # response model type var mi?
             if len(jsonData["paths"][path][httpType]["responses"]) > 0:
                 if str(jsonData["paths"][path][httpType]["responses"].get("200")) != 'None':
@@ -227,13 +236,14 @@ try:
                                     "type")) == "object" and "String" or arrayConverter(str(schema.get("type")))
                             else:
                                 func.resultType = "String"
-
+            func.resultModel = swift_TypeConverter(func.resultModel)
             functions.append(func)
         # pprint(func.funcName, func.httpMethod)
         # for requestContentTypes in jsonData["paths"][path][httpType]["consumes"]):
         #       pprint(requestContentTypes)
         #  break
         #    break
+
     print(len(functions))
 
 # with open(last.strip(), 'wb') as fl:
