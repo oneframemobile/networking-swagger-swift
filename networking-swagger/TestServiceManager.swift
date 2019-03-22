@@ -35,17 +35,17 @@ public func findPetsByTags(tags: [String], success:  @escaping (ResultModel<Stri
 
 public func uploadFile(petId: Int, additionalMetadata: String, file: String, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post("/pet/\(petId)/uploadImage",bodyParameters: petId: Int, additionalMetadata: String, file: String, , success: success, fail: fail).fetch()
+        manager.post("/pet/\(petId)/uploadImage",bodyParameters: file, success: success, fail: fail).fetch()
 }
 
 public func createUser(body: User, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post(,bodyParameters: body: User, , success: success, fail: fail).fetch()
+        manager.post("/user",bodyParameters: body, success: success, fail: fail).fetch()
 }
 
 public func createUsersWithListInput(body: [String], success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post(,bodyParameters: body: [String], , success: success, fail: fail).fetch()
+        manager.post("/user/createWithList",bodyParameters: body, success: success, fail: fail).fetch()
 }
 
 public func logoutUser(success:  @escaping (ResultModel<String>) -> Void,
@@ -80,7 +80,7 @@ public func getInventory(success:  @escaping (ResultModel<String>) -> Void,
 
 public func addPet(body: Pet, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post(,bodyParameters: body: Pet, , success: success, fail: fail).fetch()
+        manager.post("/pet",bodyParameters: body, success: success, fail: fail).fetch()
 }
 
 public func getPetById(petId: Int, success:  @escaping (ResultModel<String>) -> Void,
@@ -90,16 +90,16 @@ public func getPetById(petId: Int, success:  @escaping (ResultModel<String>) -> 
 
 public func updatePetWithForm(petId: Int, name: String, status: String, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post("/pet/\(petId)",bodyParameters: petId: Int, name: String, status: String, , success: success, fail: fail).fetch()
+        manager.post("/pet/\(petId)",bodyParameters: status, success: success, fail: fail).fetch()
 }
 
 public func placeOrder(body: Order, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post(,bodyParameters: body: Order, , success: success, fail: fail).fetch()
+        manager.post("/store/order",bodyParameters: body, success: success, fail: fail).fetch()
 }
 
 public func createUsersWithArrayInput(body: [String], success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post(,bodyParameters: body: [String], , success: success, fail: fail).fetch()
+        manager.post("/user/createWithArray",bodyParameters: body, success: success, fail: fail).fetch()
 }
 }

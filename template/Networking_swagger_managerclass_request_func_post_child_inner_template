@@ -1,5 +1,5 @@
 
 public func [FUNC_NAME]([FUNC_PARAM]success: @escaping (ResultModel<[RESULT_MODEL_NAME]>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post([QUERY_PATH],bodyParameters: [FUNC_PARAM], success: success, fail: fail).fetch()
+        manager.post([QUERY_PATH],bodyParameters: [FUNC_PARAM_BODY], success: success, fail: fail).fetch()
 }

@@ -38,6 +38,7 @@ class SwaggerFunction(object):
     parameters = []
     resultType = ""
     resultModel = ""
+    postBodyParam = ""
 
     requestFormula = ""
     # new
@@ -143,7 +144,7 @@ try:
                     dataType = ""
                     requestModel = ""
 
-                    # if we have schema property will use type and other values
+                    # if we have schema property will use type and 
                     if str(parameters.get("schema")) != 'None':
                         if str(parameters["schema"].get("type")) != 'None':
                             dataType = str(parameters["schema"].get("type")) == "array" and str(
@@ -195,6 +196,7 @@ try:
                             func.funcInlineParam = name + ": " + requestModel
                         else:
                             func.funcInlineParam += ", " + name + ": " + requestModel
+                        func.bodyFormula = name 
                     func.parameters.append(make_SwaggerFunctionParam(
                         name, paramType, required, dataType, requestModel))
                 

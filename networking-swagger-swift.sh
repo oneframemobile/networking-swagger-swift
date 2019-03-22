@@ -170,7 +170,6 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                                         str(parameters.get("schema").get("$ref")))
                                 else:
                                     requestModel = "String"
-
                         else:
                             dataType = swift_TypeConverter(
                                 str(parameters["type"]))
@@ -203,6 +202,7 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                                 func.funcInlineParam = name + ": " + requestModel
                             else:
                                 func.funcInlineParam += ", " + name + ": " + requestModel
+                            func.bodyFormula = name 
                         func.parameters.append(make_SwaggerFunctionParam(
                             name, paramType, required, dataType, requestModel))
 
@@ -736,8 +736,12 @@ def runFuncSwaggerGenerator(Functions):
 
             # child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.resultModel, "[QUERY_PATH]": func.queryFormula ==
             #                      "" and func.pathFormula or func.queryFormula, "[FUNC_PARAM]": func.funcInlineParam, "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
-            child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel, "[QUERY_PATH]": func.queryFormula ==
-                                 "" and func.pathFormula or func.queryFormula, "[FUNC_PARAM]": func.funcInlineParam}        
+            postSpesificPath = func.queryFormula == "" and func.pathFormula or func.queryFormula
+            postSpesificPath = postSpesificPath == "" and "\"" + \
+                func.path+"\"" or postSpesificPath
+            child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel,
+                                 "[QUERY_PATH]": postSpesificPath, "[FUNC_PARAM]": func.funcInlineParam,
+                                 "[FUNC_PARAM_BODY]": func.bodyFormula}
             # else:
             #     child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
             #     ), "[FUNC_PARAM]": "", "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
