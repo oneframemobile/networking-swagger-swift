@@ -56,6 +56,8 @@ class SwaggerFunction(object):
 
     # The class "constructor" - It's actually an initializer
 
+    formDataFormula = ""
+
     def __init__(self, _path):
         self.funcName = ""
         self.httpMethod = ""
@@ -172,9 +174,12 @@ try:
                                 str(parameters["items"].get("type")))
                         else:
                             requestModel = dataType
-                    if paramType == "body" or paramType == "formData":
+                    if paramType == "body":
                         func.bodyFormula += len(func.bodyFormula) > 0 and (
                             ","+name + " : " + requestModel) or name + " : " + requestModel
+                    elif paramType == "formData":
+                        func.formDataFormula += len(func.formDataFormula) > 0 and (
+                            ", \""+name+"\""+ " : " + name) or "\""+name+"\"" + " : " + name
                     elif paramType == "query":
                         if "?" in func.queryFormula:
                             func.queryFormula += "&"+name+"=\("+name+")"
@@ -205,6 +210,9 @@ try:
                     func.funcInlineParam += ", "
                 if func.queryFormula != "":
                     func.queryFormula = "\""+func.queryFormula+"\""
+                if func.formDataFormula != "":
+                    func.formDataFormula = "[" + func.formDataFormula + "]"
+                    func.bodyFormula = ""
             else: 
                 func.pathFormula = "\""+func.path+"\""
             # response model type var mi?

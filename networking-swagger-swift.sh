@@ -61,6 +61,8 @@ class SwaggerFunction(object):
 
     headerFormula = ""
 
+    formDataFormula = ""
+
     # The class "constructor" - It's actually an initializer
 
     def __init__(self, _path):
@@ -179,9 +181,12 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                                     str(parameters["items"].get("type")))
                             else:
                                 requestModel = dataType
-                        if paramType == "body" or paramType == "formData":
+                        if paramType == "body" :
                             func.bodyFormula += len(func.bodyFormula) > 0 and (
                                 ","+name + " : " + requestModel) or name + " : " + requestModel
+                        elif paramType == "formData" : 
+                            func.formDataFormula += len(func.formDataFormula) > 0 and (
+                            ", \""+name+"\""+ " : " + name) or "\""+name+"\"" + " : " + name
                         elif paramType == "query":
                             if "?" in func.queryFormula:
                                 func.queryFormula += "&"+name+"=\("+name+")"
@@ -210,6 +215,10 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                         func.funcInlineParam += ", "
                     if func.queryFormula != "":
                         func.queryFormula = "\""+func.queryFormula+"\""
+                    if func.formDataFormula != "":
+                        func.formDataFormula = "[" + func.formDataFormula + "]"
+                        func.bodyFormula = ""
+
                 else:
                     func.pathFormula = "\""+func.path+"\""
                 if len(jsonData["paths"][path][httpType]["responses"]) > 0:
