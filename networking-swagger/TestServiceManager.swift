@@ -90,6 +90,7 @@ public func getPetById(petId: Int, success:  @escaping (ResultModel<String>) -> 
 
 public func updatePetWithForm(petId: Int, name: String, status: String, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
+        let formData =  ["name" : name, "status" : status]
         manager.post("/pet/\(petId)",bodyParameters: status, success: success, fail: fail).fetch()
 }
 

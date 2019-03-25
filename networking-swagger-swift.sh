@@ -741,7 +741,7 @@ def runFuncSwaggerGenerator(Functions):
                 func.path+"\"" or postSpesificPath
             child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel,
                                  "[QUERY_PATH]": postSpesificPath, "[FUNC_PARAM]": func.funcInlineParam,
-                                 "[FUNC_PARAM_BODY]": func.bodyFormula}
+                                 "[FUNC_PARAM_BODY]": func.bodyFormula == "" and func.formDataFormula or func.bodyFormula}
             # else:
             #     child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
             #     ), "[FUNC_PARAM]": "", "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
