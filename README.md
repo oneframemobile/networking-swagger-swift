@@ -2,8 +2,8 @@
 @umutboz :electric_plug: Networking JAVA Code Gen Tool :shipit:
 
 #1.0.0
-sh networking-swagger-swift.sh http://petstore.swagger.io/v2/swagger.json Test
-*networking-swagger-swift -url -package -serviceName -resultJsonKey*
+#sh networking-swagger-swift.sh http://petstore.swagger.io/v2/swagger.json Test
+#*networking-swagger-swift -url -package -serviceName -resultJsonKey*
 
 *networking-swagger-java
 http://178.211.54.214:5000/swagger/v1/swagger.json
