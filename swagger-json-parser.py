@@ -81,14 +81,14 @@ def make_SwaggerFunction(_path):
 
 def swift_TypeConverter(val):
     #python veriable syntax convert swift syntax
-    if val == "string":
+    if val == "string" or val == "" or val == "file":
         return "String"
     elif val == "integer":
         return "Int"
     elif val == "array":
         return "[]"
     else:
-        return "String"
+        return val
 
 
 def func_definitionTypeSplit(val):
@@ -179,7 +179,7 @@ try:
                             ","+name + " : " + requestModel) or name + " : " + requestModel
                     elif paramType == "formData":
                         func.formDataFormula += len(func.formDataFormula) > 0 and (
-                            ", \""+name+"\""+ " : " + name) or "\""+name+"\"" + " : " + name
+                            ", \""+name+"\""+ " : " + "\"\("+name+")") or "\""+name+"\"" + " : " + "\"\("+name+")")
                     elif paramType == "query":
                         if "?" in func.queryFormula:
                             func.queryFormula += "&"+name+"=\("+name+")"
@@ -211,7 +211,10 @@ try:
                 if func.queryFormula != "":
                     func.queryFormula = "\""+func.queryFormula+"\""
                 if func.formDataFormula != "":
-                    func.formDataFormula = "[" + func.formDataFormula + "]"
+                    func.formDataFormula = "[" +  func.formDataFormula + "]"
+                    _jsonData = "try? JSONSerialization.data(withJSONObject:"+ func.formDataFormula + ", options: .prettyPrinted)"
+                    jsonString = "String(data:"+_jsonData+"!, encoding: .utf8)"
+                    func.formDataFormula = jsonString
                     func.bodyFormula = ""
             else: 
                 func.pathFormula = "\""+func.path+"\""

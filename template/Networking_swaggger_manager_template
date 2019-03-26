@@ -23,7 +23,7 @@ class [SERVICE_NAME]Manager {
         manager.setJsonKey(RESULT_TAG)
         config.deleteAllHeaders()
         config.setURL(URL:URL)
-        var _ = config.addHeader(parameters: headerParamters)
+        // var _ = config.addHeader(parameters: headerParamters)
     }
  
     //{{request_func}}

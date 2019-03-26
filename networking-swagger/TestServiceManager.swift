@@ -23,7 +23,7 @@ class TestManager {
         manager.setJsonKey(RESULT_TAG)
         config.deleteAllHeaders()
         config.setURL(URL:URL)
-        var _ = config.addHeader(parameters: headerParamters)
+        // var _ = config.addHeader(parameters: headerParamters)
     }
  
     //{{request_func}}
@@ -33,19 +33,25 @@ public func findPetsByTags(tags: [String], success:  @escaping (ResultModel<Stri
     manager.get("/pet/findByTags?tags=\(tags)",success: success, fail: fail).fetch()
 }
 
-public func uploadFile(petId: Int, additionalMetadata: String, file: String, success: @escaping (ResultModel<String>) -> (),
+public func uploadFile(petId: Int, additionalMetadata: String, file: String, success: @escaping (ResultModel<ApiResponse>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post("/pet/\(petId)/uploadImage",bodyParameters: ["additionalMetadata" : additionalMetadata, "file" : file], success: success, fail: fail).fetch()
+        let jsonData = try? JSONSerialization.data(withJSONObject: ["additionalMetadata" : "\(additionalMetadata)", "file" : "\(file)"], options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.post("/pet/\(petId)/uploadImage",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 
 public func createUser(body: User, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post("/user",bodyParameters: body, success: success, fail: fail).fetch()
+        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.post("/user",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 
-public func createUsersWithListInput(body: [String], success: @escaping (ResultModel<String>) -> (),
+public func createUsersWithListInput(body: [User], success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post("/user/createWithList",bodyParameters: body, success: success, fail: fail).fetch()
+        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.post("/user/createWithList",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 
 public func logoutUser(success:  @escaping (ResultModel<String>) -> Void,
@@ -58,12 +64,12 @@ public func findPetsByStatus(status: [String], success:  @escaping (ResultModel<
     manager.get("/pet/findByStatus?status=\(status)",success: success, fail: fail).fetch()
 }
 
-public func getUserByName(username: String, success:  @escaping (ResultModel<String>) -> Void,
+public func getUserByName(username: String, success:  @escaping (ResultModel<User>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
     manager.get("/user/\(username)",success: success, fail: fail).fetch()
 }
 
-public func getOrderById(orderId: Int, success:  @escaping (ResultModel<String>) -> Void,
+public func getOrderById(orderId: Int, success:  @escaping (ResultModel<Order>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
     manager.get("/store/order/\(orderId)",success: success, fail: fail).fetch()
 }
@@ -80,26 +86,34 @@ public func getInventory(success:  @escaping (ResultModel<String>) -> Void,
 
 public func addPet(body: Pet, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post("/pet",bodyParameters: body, success: success, fail: fail).fetch()
+        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.post("/pet",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 
-public func getPetById(petId: Int, success:  @escaping (ResultModel<String>) -> Void,
+public func getPetById(petId: Int, success:  @escaping (ResultModel<Pet>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
     manager.get("/pet/\(petId)",success: success, fail: fail).fetch()
 }
 
 public func updatePetWithForm(petId: Int, name: String, status: String, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post("/pet/\(petId)",bodyParameters: ["name" : name, "status" : status], success: success, fail: fail).fetch()
+        let jsonData = try? JSONSerialization.data(withJSONObject: ["name" : "\(name)", "status" : "\(status)"], options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.post("/pet/\(petId)",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 
-public func placeOrder(body: Order, success: @escaping (ResultModel<String>) -> (),
+public func placeOrder(body: Order, success: @escaping (ResultModel<Order>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post("/store/order",bodyParameters: body, success: success, fail: fail).fetch()
+        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.post("/store/order",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 
-public func createUsersWithArrayInput(body: [String], success: @escaping (ResultModel<String>) -> (),
+public func createUsersWithArrayInput(body: [User], success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        manager.post("/user/createWithArray",bodyParameters: body, success: success, fail: fail).fetch()
+        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.post("/user/createWithArray",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 }
