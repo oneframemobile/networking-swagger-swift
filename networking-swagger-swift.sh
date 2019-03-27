@@ -694,7 +694,6 @@ def getModels(path):
     listNew = list(map(lambda x:  re.split(SWIFT, x), subList))
     return listNew
 
-
 def replaceModelPackage(path, packageName, subList):
     packageName = 'import ' + packageName + "\n" + 'import Foundation'
     for subItem in subList:
