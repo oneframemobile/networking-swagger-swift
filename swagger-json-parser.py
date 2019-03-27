@@ -179,7 +179,7 @@ try:
                             ","+name + " : " + requestModel) or name + " : " + requestModel
                     elif paramType == "formData":
                         func.formDataFormula += len(func.formDataFormula) > 0 and (
-                            ", \""+name+"\""+ " : " + "\"\("+name+")") or "\""+name+"\"" + " : " + "\"\("+name+")")
+                            ", \""+name+"\""+ " : " + "\"\("+name+")") or "\""+name+"\"" + " : " + "\"\("+name+")"
                     elif paramType == "query":
                         if "?" in func.queryFormula:
                             func.queryFormula += "&"+name+"=\("+name+")"

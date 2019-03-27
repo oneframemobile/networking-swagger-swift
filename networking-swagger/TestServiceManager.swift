@@ -11,7 +11,7 @@ import Networking
 class TestManager {
     let manager : NetworkManager
     let config = NetworkConfig.shared
-    let URL = "https://oneframe-configserver-api.apps-int.pcf.dev.kocsistem.com.tr//"
+    let URL = "https://oneframe-configserver-api.apps-int.pcf.dev.kocsistem.com.tr/"
      
     let  RESULT_TAG = ["JSON_KEY"]
     let headerParamters : [String : String] = [
