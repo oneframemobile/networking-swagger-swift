@@ -375,7 +375,7 @@ CHILD_UNIT_TEST_GET_FUNC_TEMPLATE = "Networking_swagger_unit_test_request_func_g
 CHILD_UNIT_TEST_POST_FUNC_TEMPLATE = "Networking_swagger_unit_test_request_func_post_template"
 
 TEMPLATE_FOLDER = "template/"
-ONLINE_FOLDER = "https://raw.githubusercontent.com/umutboz/networking-swagger/master/template/"
+ONLINE_FOLDER = "https://raw.githubusercontent.com/oneframemobile/networking-swagger-swift/master/template"
 parent_module = ''
 sub_module = ''
 
@@ -740,7 +740,7 @@ def runFuncSwaggerGenerator(Functions):
                               insertingModule=manager_file_path, subType=1)
             generateApiFuncCount = generateApiFuncCount + 1
 
-        elif intern(func.httpMethod) is intern("post"):
+        elif intern(func.httpMethod) is intern("post") or intern("put"):
 
             # child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.resultModel, "[QUERY_PATH]": func.queryFormula ==
             #                      "" and func.pathFormula or func.queryFormula, "[FUNC_PARAM]": func.funcInlineParam, "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
