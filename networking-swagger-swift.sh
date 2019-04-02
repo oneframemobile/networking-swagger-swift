@@ -181,12 +181,12 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                                     str(parameters["items"].get("type")))
                             else:
                                 requestModel = dataType
-                        if paramType == "body" :
+                        if paramType == "body":
                             func.bodyFormula += len(func.bodyFormula) > 0 and (
                                 ","+name + " : " + requestModel) or name + " : " + requestModel
-                        elif paramType == "formData" : 
+                        elif paramType == "formData":
                             func.formDataFormula += len(func.formDataFormula) > 0 and (
-                                ", \""+name+"\""+ " : " + "\"\("+name+")\"") or "\""+name+"\"" + " : " + "\"\("+name+")\""
+                                ", \""+name+"\"" + " : " + "\"\("+name+")\"") or "\""+name+"\"" + " : " + "\"\("+name+")\""
                         elif paramType == "query":
                             if "?" in func.queryFormula:
                                 func.queryFormula += "&"+name+"=\("+name+")"
@@ -207,7 +207,7 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                                 func.funcInlineParam = name + ": " + requestModel
                             else:
                                 func.funcInlineParam += ", " + name + ": " + requestModel
-                            func.bodyFormula = name 
+                            func.bodyFormula = name
                         func.parameters.append(make_SwaggerFunctionParam(
                             name, paramType, required, dataType, requestModel))
 
@@ -216,7 +216,7 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                     if func.queryFormula != "":
                         func.queryFormula = "\""+func.queryFormula+"\""
                     if func.formDataFormula != "":
-                        func.formDataFormula = "[" +  func.formDataFormula + "]"
+                        func.formDataFormula = "[" + func.formDataFormula + "]"
                         func.bodyFormula = ""
 
                 else:
@@ -374,6 +374,9 @@ CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE = "Networking_swagger_import_package_inner
 CHILD_UNIT_TEST_GET_FUNC_TEMPLATE = "Networking_swagger_unit_test_request_func_get_template"
 CHILD_UNIT_TEST_POST_FUNC_TEMPLATE = "Networking_swagger_unit_test_request_func_post_template"
 
+CHILD_MANAGER_PUT_FUNC_TEMPLATE = "Networking_swagger_managerclass_request_func_put_child_inner_template"
+
+
 TEMPLATE_FOLDER = "template/"
 ONLINE_FOLDER = "https://raw.githubusercontent.com/oneframemobile/networking-swagger-swift/master/template"
 parent_module = ''
@@ -396,7 +399,7 @@ unit_test_func = "//{{unit_test_func}}"
 
 
 def initVariables():
-    global CHILD_UNIT_TEST_POST_FUNC_TEMPLATE, CHILD_UNIT_TEST_GET_FUNC_TEMPLATE, NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE, IS_ENABLE_UNIT_TEST_GENERATE, replacement, child_replacement, last_request_cache_key, last_request_cache_content, NETWORKNG_SWAGGER_MANAGER_TEMPLATE, CHILD_MANAGER_ADD_HEADER_TEMPLATE, CHILD_MANAGER_GET_FUNC_TEMPLATE, CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_POST_FUNC_TEMPLATE, CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE, swagger_root_http_url
+    global CHILD_UNIT_TEST_POST_FUNC_TEMPLATE, CHILD_UNIT_TEST_GET_FUNC_TEMPLATE, NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE, IS_ENABLE_UNIT_TEST_GENERATE, replacement, child_replacement, last_request_cache_key, last_request_cache_content, NETWORKNG_SWAGGER_MANAGER_TEMPLATE, CHILD_MANAGER_ADD_HEADER_TEMPLATE, CHILD_MANAGER_GET_FUNC_TEMPLATE, CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_POST_FUNC_TEMPLATE, CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE, swagger_root_http_url,CHILD_MANAGER_PUT_FUNC_TEMPLATE
     if intern(DEV_ENV.ONLINE) is intern(CURRENT_DEV_ENV):
         NETWORKNG_SWAGGER_MANAGER_TEMPLATE = ONLINE_FOLDER + \
             NETWORKNG_SWAGGER_MANAGER_TEMPLATE
@@ -406,6 +409,7 @@ def initVariables():
         CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE = ONLINE_FOLDER + \
             CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE
         CHILD_MANAGER_POST_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_POST_FUNC_TEMPLATE
+        CHILD_MANAGER_PUT_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_PUT_FUNC_TEMPLATE
         CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE = ONLINE_FOLDER + \
             CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE
         CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE = ONLINE_FOLDER + \
@@ -427,6 +431,9 @@ def initVariables():
             CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE
         CHILD_MANAGER_POST_FUNC_TEMPLATE = TEMPLATE_FOLDER + \
             CHILD_MANAGER_POST_FUNC_TEMPLATE
+        CHILD_MANAGER_PUT_FUNC_TEMPLATE = TEMPLATE_FOLDER + \
+            CHILD_MANAGER_PUT_FUNC_TEMPLATE
+            
         CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE = TEMPLATE_FOLDER + \
             CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE
         CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE = TEMPLATE_FOLDER + \
@@ -694,6 +701,7 @@ def getModels(path):
     listNew = list(map(lambda x:  re.split(SWIFT, x), subList))
     return listNew
 
+
 def replaceModelPackage(path, packageName, subList):
     packageName = 'import ' + packageName + "\n" + 'import Foundation'
     for subItem in subList:
@@ -740,7 +748,7 @@ def runFuncSwaggerGenerator(Functions):
                               insertingModule=manager_file_path, subType=1)
             generateApiFuncCount = generateApiFuncCount + 1
 
-        elif intern(func.httpMethod) is intern("post") or intern("put"):
+        elif intern(func.httpMethod) is intern("post"):
 
             # child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.resultModel, "[QUERY_PATH]": func.queryFormula ==
             #                      "" and func.pathFormula or func.queryFormula, "[FUNC_PARAM]": func.funcInlineParam, "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
@@ -756,8 +764,24 @@ def runFuncSwaggerGenerator(Functions):
             childInsertMember(childInnerTemplate=CHILD_MANAGER_POST_FUNC_TEMPLATE,
                               insertingModule=manager_file_path, subType=1)
             generateApiFuncCount = generateApiFuncCount + 1
-        generateApiFuncCount = generateApiFuncCount + 1
+        
 
+        elif intern(func.httpMethod) is intern("put"):
+                        # child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.resultModel, "[QUERY_PATH]": func.queryFormula ==
+            #                      "" and func.pathFormula or func.queryFormula, "[FUNC_PARAM]": func.funcInlineParam, "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
+            putSpesificPath = func.queryFormula == "" and func.pathFormula or func.queryFormula
+            putSpesificPath = postSpesificPath == "" and "\"" + \
+                func.path+"\"" or putSpesificPath
+            child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel,
+                                 "[QUERY_PATH]": putSpesificPath == "" and "\"\"" or putSpesificPath, "[FUNC_PARAM]": func.funcInlineParam,
+                                 "[FUNC_PARAM_BODY]": func.bodyFormula == "" and func.formDataFormula or func.bodyFormula}
+            # else:
+            #     child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
+            #     ), "[FUNC_PARAM]": "", "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
+            childInsertMember(childInnerTemplate=CHILD_MANAGER_PUT_FUNC_TEMPLATE,
+                              insertingModule=manager_file_path, subType=1)
+            generateApiFuncCount = generateApiFuncCount + 1
+        generateApiFuncCount = generateApiFuncCount + 1
         # print func.funcName
 
     showErrorMessages(MESSAGE.INFO, str(
