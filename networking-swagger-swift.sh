@@ -792,9 +792,20 @@ def runFuncSwaggerGenerator(Functions):
                 func.path+"\"" or deleteSpesificPath
             func.bodyFormula =  func.bodyFormula == "" and func.formDataFormula or func.bodyFormula
             func.bodyFormula =  deleteSpesificPath.__contains__(func.bodyFormula) == "" and func.formDataFormula or "\"\""
+            lineSum = ""
+        #             let jsonData = try? JSONSerialization.data(withJSONObject: [FUNC_PARAM_BODY], options: .prettyPrinted)
+        # let jsonString = String(data: jsonData!, encoding: .utf8)
+            if deleteSpesificPath.__contains__(func.bodyFormula):
+                line1 = "let jsonData = try? JSONSerialization.data(withJSONObject: "+func.bodyFormula+", options: .prettyPrinted)"
+                line2 = "let jsonString = String(data: jsonData!, encoding: .utf8)"
+                lineSum = line1 + "\n" + line2
+            else:
+                print("false")
+                func.bodyFormula = "\"\""
             child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel,
                                  "[QUERY_PATH]": deleteSpesificPath , "[FUNC_PARAM]": func.funcInlineParam,
-                                 "[FUNC_PARAM_BODY]": func.bodyFormula}
+                                 "[JSON_VALUE_KEY]": lineSum != "" and "jsonString" or "\"\""  ,
+                                 "[JSON_VALUE_KEY2]": lineSum}
             # else:
             #     child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
             #     ), "[FUNC_PARAM]": "", "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
