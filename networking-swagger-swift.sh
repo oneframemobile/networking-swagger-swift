@@ -202,7 +202,7 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                                 ","+name + " : " + requestModel) or name + " : " + requestModel
                         else:
                             func.pathFormula = "\""+func.pathFormula+"\""
-                        if name != "":
+                        if name != "" and paramType != "header":
                             if func.funcInlineParam == "":
                                 func.funcInlineParam = name + ": " + requestModel
                             else:
@@ -375,6 +375,7 @@ CHILD_UNIT_TEST_GET_FUNC_TEMPLATE = "Networking_swagger_unit_test_request_func_g
 CHILD_UNIT_TEST_POST_FUNC_TEMPLATE = "Networking_swagger_unit_test_request_func_post_template"
 
 CHILD_MANAGER_PUT_FUNC_TEMPLATE = "Networking_swagger_managerclass_request_func_put_child_inner_template"
+CHILD_MANAGER_DELETE_FUNC_TEMPLATE = "Networking_swagger_managerclass_request_func_delete_child_inner_template"
 
 
 TEMPLATE_FOLDER = "template/"
@@ -399,7 +400,7 @@ unit_test_func = "//{{unit_test_func}}"
 
 
 def initVariables():
-    global CHILD_UNIT_TEST_POST_FUNC_TEMPLATE, CHILD_UNIT_TEST_GET_FUNC_TEMPLATE, NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE, IS_ENABLE_UNIT_TEST_GENERATE, replacement, child_replacement, last_request_cache_key, last_request_cache_content, NETWORKNG_SWAGGER_MANAGER_TEMPLATE, CHILD_MANAGER_ADD_HEADER_TEMPLATE, CHILD_MANAGER_GET_FUNC_TEMPLATE, CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_POST_FUNC_TEMPLATE, CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE, swagger_root_http_url,CHILD_MANAGER_PUT_FUNC_TEMPLATE
+    global CHILD_UNIT_TEST_POST_FUNC_TEMPLATE, CHILD_UNIT_TEST_GET_FUNC_TEMPLATE, NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE, IS_ENABLE_UNIT_TEST_GENERATE, replacement, child_replacement, last_request_cache_key, last_request_cache_content, NETWORKNG_SWAGGER_MANAGER_TEMPLATE, CHILD_MANAGER_ADD_HEADER_TEMPLATE, CHILD_MANAGER_GET_FUNC_TEMPLATE, CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_POST_FUNC_TEMPLATE, CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE, swagger_root_http_url,CHILD_MANAGER_PUT_FUNC_TEMPLATE,CHILD_MANAGER_DELETE_FUNC_TEMPLATE
     if intern(DEV_ENV.ONLINE) is intern(CURRENT_DEV_ENV):
         NETWORKNG_SWAGGER_MANAGER_TEMPLATE = ONLINE_FOLDER + \
             NETWORKNG_SWAGGER_MANAGER_TEMPLATE
@@ -410,6 +411,8 @@ def initVariables():
             CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE
         CHILD_MANAGER_POST_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_POST_FUNC_TEMPLATE
         CHILD_MANAGER_PUT_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_PUT_FUNC_TEMPLATE
+        CHILD_MANAGER_DELETE_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_DELETE_FUNC_TEMPLATE
+
         CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE = ONLINE_FOLDER + \
             CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE
         CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE = ONLINE_FOLDER + \
@@ -433,7 +436,9 @@ def initVariables():
             CHILD_MANAGER_POST_FUNC_TEMPLATE
         CHILD_MANAGER_PUT_FUNC_TEMPLATE = TEMPLATE_FOLDER + \
             CHILD_MANAGER_PUT_FUNC_TEMPLATE
-            
+        CHILD_MANAGER_DELETE_FUNC_TEMPLATE = TEMPLATE_FOLDER + \
+             CHILD_MANAGER_DELETE_FUNC_TEMPLATE
+     
         CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE = TEMPLATE_FOLDER + \
             CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE
         CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE = TEMPLATE_FOLDER + \
@@ -770,7 +775,7 @@ def runFuncSwaggerGenerator(Functions):
                         # child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.resultModel, "[QUERY_PATH]": func.queryFormula ==
             #                      "" and func.pathFormula or func.queryFormula, "[FUNC_PARAM]": func.funcInlineParam, "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
             putSpesificPath = func.queryFormula == "" and func.pathFormula or func.queryFormula
-            putSpesificPath = postSpesificPath == "" and "\"" + \
+            putSpesificPath = putSpesificPath == "" and "\"" + \
                 func.path+"\"" or putSpesificPath
             child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel,
                                  "[QUERY_PATH]": putSpesificPath == "" and "\"\"" or putSpesificPath, "[FUNC_PARAM]": func.funcInlineParam,
@@ -779,6 +784,21 @@ def runFuncSwaggerGenerator(Functions):
             #     child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
             #     ), "[FUNC_PARAM]": "", "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
             childInsertMember(childInnerTemplate=CHILD_MANAGER_PUT_FUNC_TEMPLATE,
+                              insertingModule=manager_file_path, subType=1)
+            generateApiFuncCount = generateApiFuncCount + 1
+        else:
+            deleteSpesificPath = func.queryFormula == "" and func.pathFormula or func.queryFormula
+            deleteSpesificPath = deleteSpesificPath == "" and "\"" + \
+                func.path+"\"" or deleteSpesificPath
+            func.bodyFormula =  func.bodyFormula == "" and func.formDataFormula or func.bodyFormula
+            func.bodyFormula =  deleteSpesificPath.__contains__(func.bodyFormula) == "" and func.formDataFormula or "\"\""
+            child_replacement = {"[FUNC_NAME]": func.funcName, "[RESULT_MODEL_NAME]": func.resultModel,
+                                 "[QUERY_PATH]": deleteSpesificPath , "[FUNC_PARAM]": func.funcInlineParam,
+                                 "[FUNC_PARAM_BODY]": func.bodyFormula}
+            # else:
+            #     child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
+            #     ), "[FUNC_PARAM]": "", "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
+            childInsertMember(childInnerTemplate=CHILD_MANAGER_DELETE_FUNC_TEMPLATE,
                               insertingModule=manager_file_path, subType=1)
             generateApiFuncCount = generateApiFuncCount + 1
         generateApiFuncCount = generateApiFuncCount + 1

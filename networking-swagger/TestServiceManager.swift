@@ -69,6 +69,13 @@ public func getUserByName(username: String, success:  @escaping (ResultModel<Use
     manager.get("/user/\(username)",success: success, fail: fail).fetch()
 }
 
+public func deleteUser(username: String, success: @escaping (ResultModel<String>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        let jsonData = try? JSONSerialization.data(withJSONObject: "", options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.delete("/user/\(username)",bodyParameters: jsonString, success: success, fail: fail).fetch()
+}
+
 public func updateUser(username: String, body: User, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
         let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
@@ -79,6 +86,13 @@ public func updateUser(username: String, body: User, success: @escaping (ResultM
 public func getOrderById(orderId: Int, success:  @escaping (ResultModel<Order>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
     manager.get("/store/order/\(orderId)",success: success, fail: fail).fetch()
+}
+
+public func deleteOrder(orderId: Int, success: @escaping (ResultModel<String>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        let jsonData = try? JSONSerialization.data(withJSONObject: "", options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.delete("/store/order/\(orderId)",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 
 public func loginUser(username: String, password: String, success:  @escaping (ResultModel<String>) -> Void,
@@ -102,12 +116,19 @@ public func updatePet(body: Pet, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
         let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
         let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.put("",bodyParameters: jsonString, success: success, fail: fail).fetch()
+        manager.put("/pet",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 
 public func getPetById(petId: Int, success:  @escaping (ResultModel<Pet>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
     manager.get("/pet/\(petId)",success: success, fail: fail).fetch()
+}
+
+public func deletePet(petId: Int, success: @escaping (ResultModel<String>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        let jsonData = try? JSONSerialization.data(withJSONObject: "", options: .prettyPrinted)
+        let jsonString = String(data: jsonData!, encoding: .utf8)
+        manager.delete("/pet/\(petId)",bodyParameters: jsonString, success: success, fail: fail).fetch()
 }
 
 public func updatePetWithForm(petId: Int, name: String, status: String, success: @escaping (ResultModel<String>) -> (),
