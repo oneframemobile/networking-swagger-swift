@@ -78,9 +78,8 @@ def make_SwaggerFunction(_path):
     func = SwaggerFunction(_path)
     return func
 
-
+# primitive typeları swifte uygun hale çevrilir geri kalanlar direk basılır
 def swift_TypeConverter(val):
-    #python veriable syntax convert swift syntax
     if val == "string" or val == "" or val == "file":
         return "String"
     elif val == "integer":
@@ -126,6 +125,8 @@ try:
             func.httpMethod = str(httpType)
             func.funcName = str(
                 jsonData["paths"][path][httpType]["operationId"])
+
+
             # request content type var mi?
             if jsonData["paths"][path][httpType].has_key('consumes'):
                 if len(jsonData["paths"][path][httpType]["consumes"]) > 0:
@@ -138,7 +139,7 @@ try:
                     func.requestContentTypes.append(str(responseContentType))
             # paramaters varmi ?
             # if i have paramaters but could paramaters is empty for add len conrol.
-            if str(jsonData["paths"][path][httpType].get("parameters")) != 'None' and len(jsonData["paths"][path][httpType].get("parameters")) >0:
+            if str(jsonData["paths"][path][httpType].get("parameters")) != 'None' and len(jsonData["paths"][path][httpType].get("parameters")) > 0:
                 for parameters in jsonData["paths"][path][httpType]["parameters"]:
                     name = str(parameters["name"])
                     paramType = str(parameters["in"])
@@ -146,7 +147,7 @@ try:
                     dataType = ""
                     requestModel = ""
 
-                    # if we have schema property will use type and 
+                    # if we have schema property will use type and
                     if str(parameters.get("schema")) != 'None':
                         if str(parameters["schema"].get("type")) != 'None':
                             dataType = str(parameters["schema"].get("type")) == "array" and str(
@@ -168,7 +169,6 @@ try:
 
                     else:
                         dataType = swift_TypeConverter(str(parameters["type"]))
-                        # TODO 1. array ?
                         if str(parameters.get("items")) != 'None':
                             requestModel = arrayConverter(
                                 str(parameters["items"].get("type")))
@@ -178,12 +178,15 @@ try:
                         func.bodyFormula += len(func.bodyFormula) > 0 and (
                             ","+name + " : " + requestModel) or name + " : " + requestModel
                     elif paramType == "formData":
+                        # len control so check formdata have any items
                         func.formDataFormula += len(func.formDataFormula) > 0 and (
-                            ", \""+name+"\""+ " : " + "\"\("+name+")") or "\""+name+"\"" + " : " + "\"\("+name+")"
+                            ", \""+name+"\"" + " : " + "\"\("+name+")") or "\""+name+"\"" + " : " + "\"\("+name+")"
                     elif paramType == "query":
+                        # if have already added query
                         if "?" in func.queryFormula:
                             func.queryFormula += "&"+name+"=\("+name+")"
                         else:
+                            # first add query at url
                             func.queryFormula = func.path + \
                                 "?"+name+"=\("+name+")"
                     elif paramType == "path":
@@ -194,29 +197,29 @@ try:
                     elif paramType == "header":
                         func.headerFormula += len(func.bodyFormula) > 0 and (
                             ","+name + " : " + requestModel) or name + " : " + requestModel
-                    else :
+                    else:
                         func.pathFormula = "\""+func.pathFormula+"\""
-                    if name != "":
+                    if name != "" and paramType != "header":
                         if func.funcInlineParam == "":
                             func.funcInlineParam = name + ": " + requestModel
                         else:
                             func.funcInlineParam += ", " + name + ": " + requestModel
-                        func.bodyFormula = name 
+                        func.bodyFormula = name
                     func.parameters.append(make_SwaggerFunctionParam(
                         name, paramType, required, dataType, requestModel))
-                
+
                 # last character add ,
                 if func.funcInlineParam != "":
                     func.funcInlineParam += ", "
+                    # swift için çift tırnaklı hale getirme
                 if func.queryFormula != "":
                     func.queryFormula = "\""+func.queryFormula+"\""
                 if func.formDataFormula != "":
-                    func.formDataFormula = "[" +  func.formDataFormula + "]"
-                    _jsonData = "try? JSONSerialization.data(withJSONObject:"+ func.formDataFormula + ", options: .prettyPrinted)"
-                    jsonString = "String(data:"+_jsonData+"!, encoding: .utf8)"
-                    func.formDataFormula = jsonString
+                    # formdata formulayı array olarak parse etmek için
+                    func.formDataFormula = "[" + func.formDataFormula + "]"
                     func.bodyFormula = ""
-            else: 
+            else:
+                # herhangi bir istek yoksa direk path basılır
                 func.pathFormula = "\""+func.path+"\""
             # response model type var mi?
             if len(jsonData["paths"][path][httpType]["responses"]) > 0:
@@ -248,7 +251,9 @@ try:
                                     "type")) == "object" and "String" or arrayConverter(str(schema.get("type")))
                             else:
                                 func.resultType = "String"
+            # swift formatına uygun model çevirisi
             func.resultModel = swift_TypeConverter(func.resultModel)
+            func.bodyFormula = "\"\""
             functions.append(func)
         # pprint(func.funcName, func.httpMethod)
         # for requestContentTypes in jsonData["paths"][path][httpType]["consumes"]):
