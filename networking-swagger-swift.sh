@@ -378,7 +378,7 @@ CHILD_MANAGER_DELETE_FUNC_TEMPLATE = "Networking_swagger_managerclass_request_fu
 
 
 TEMPLATE_FOLDER = "template/"
-ONLINE_FOLDER = "https://raw.githubusercontent.com/oneframemobile/networking-swagger-swift/master/template"
+ONLINE_FOLDER = "https://raw.githubusercontent.com/oneframemobile/networking-swagger-swift/master/template/"
 parent_module = ''
 sub_module = ''
 
@@ -401,27 +401,20 @@ unit_test_func = "//{{unit_test_func}}"
 def initVariables():
     global CHILD_UNIT_TEST_POST_FUNC_TEMPLATE, CHILD_UNIT_TEST_GET_FUNC_TEMPLATE, NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE, IS_ENABLE_UNIT_TEST_GENERATE, replacement, child_replacement, last_request_cache_key, last_request_cache_content, NETWORKNG_SWAGGER_MANAGER_TEMPLATE, CHILD_MANAGER_ADD_HEADER_TEMPLATE, CHILD_MANAGER_GET_FUNC_TEMPLATE, CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_POST_FUNC_TEMPLATE, CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE, CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE, swagger_root_http_url,CHILD_MANAGER_PUT_FUNC_TEMPLATE,CHILD_MANAGER_DELETE_FUNC_TEMPLATE
     if intern(DEV_ENV.ONLINE) is intern(CURRENT_DEV_ENV):
-        NETWORKNG_SWAGGER_MANAGER_TEMPLATE = ONLINE_FOLDER + \
-            NETWORKNG_SWAGGER_MANAGER_TEMPLATE
-        CHILD_MANAGER_ADD_HEADER_TEMPLATE = ONLINE_FOLDER + \
-            CHILD_MANAGER_ADD_HEADER_TEMPLATE
+        NETWORKNG_SWAGGER_MANAGER_TEMPLATE = ONLINE_FOLDER + NETWORKNG_SWAGGER_MANAGER_TEMPLATE
+        CHILD_MANAGER_ADD_HEADER_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_ADD_HEADER_TEMPLATE
         CHILD_MANAGER_GET_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_GET_FUNC_TEMPLATE
-        CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE = ONLINE_FOLDER + \
-            CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE
+        CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_GET_FUNC_NO_SEMICOLON_TEMPLATE
         CHILD_MANAGER_POST_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_POST_FUNC_TEMPLATE
+        
         CHILD_MANAGER_PUT_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_PUT_FUNC_TEMPLATE
         CHILD_MANAGER_DELETE_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_DELETE_FUNC_TEMPLATE
 
-        CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE = ONLINE_FOLDER + \
-            CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE
-        CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE = ONLINE_FOLDER + \
-            CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE
-        NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE = ONLINE_FOLDER + \
-            NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE
-        CHILD_UNIT_TEST_GET_FUNC_TEMPLATE = ONLINE_FOLDER + \
-            CHILD_UNIT_TEST_GET_FUNC_TEMPLATE
-        CHILD_UNIT_TEST_POST_FUNC_TEMPLATE = ONLINE_FOLDER + \
-            CHILD_UNIT_TEST_POST_FUNC_TEMPLATE
+        CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_POST_FUNC_NO_SEMICOLON_TEMPLATE
+        CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE = ONLINE_FOLDER + CHILD_MANAGER_IMPORT_PACKAGE_TEMPLATE
+        NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE = ONLINE_FOLDER + NETWORKNG_SWAGGER_UNIT_TEST_TEMPLATE
+        CHILD_UNIT_TEST_GET_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_UNIT_TEST_GET_FUNC_TEMPLATE
+        CHILD_UNIT_TEST_POST_FUNC_TEMPLATE = ONLINE_FOLDER + CHILD_UNIT_TEST_POST_FUNC_TEMPLATE
 
     else:
         NETWORKNG_SWAGGER_MANAGER_TEMPLATE = TEMPLATE_FOLDER + \
@@ -818,84 +811,8 @@ def runFuncSwaggerGenerator(Functions):
         generateApiFuncCount) + " api func generated")
 
 
-def runRetrofitParser():
-    generateApiFuncCount = 0
-    oldApiPath = os.getcwd() + CODING.SLASH + SWAGGER_CLIENT_FILEPATH + "api/"
-    subList = os.listdir(oldApiPath)
-    for apiFile in subList:
-        apiFilePath = oldApiPath + apiFile
-
-        with open(apiFilePath) as fp:
-            lines = fp.readlines()
-
-            clazz = Clazz.parse(lines)
-            showErrorMessages(MESSAGE.INFO, str(
-                len(clazz.functions)) + str(clazz.name) + " api func generating...")
-            generateApiFuncCount += generateNetworkingFunc(clazz.functions)
-            if IS_ENABLE_UNIT_TEST_GENERATE == True:
-                generateUnitTestFunc(clazz.functions)
-    # print len(clazz.functions)
-    '''
-    public GenericObjectRequest [FUNC_NAME](final NetworkResponseListener<[RESULT_MODEL_NAME], ServiceErrorModel> listener) {
-         return manager.get("[QUERY_PATH]", listener);
-     }
-       public GenericObjectRequest [FUNC_NAME]([REQUEST_MODEL_NAME] model, final NetworkResponseListener<[RESULT_MODEL_NAME], ServiceErrorModel> listener) {
-       return manager.post("[QUERY_PATH]", model, listener);
-     }
-    '''
-    # print clazz.functions[0].querypath()
-    showErrorMessages(MESSAGE.INFO, str(
-        generateApiFuncCount) + " api func generated")
-    if os.path.isdir(oldApiPath):
-        shutil.rmtree(oldApiPath)
-    if os.path.isdir(os.getcwd() + CODING.SLASH + "src/main/java/io/"):
-        shutil.rmtree(os.getcwd() + CODING.SLASH + "src/main/java/io/")
-
-    del lines
 
 
-def generateNetworkingFunc(Functions):
-    global child_replacement
-    generateApiFuncCount = 0
-    for func in Functions:
-        showErrorMessages(MESSAGE.INFO,  func.name + " api func generating...")
-        hasInlineParam = False
-        funcInlineParam = ""
-        funcBodyInlineParam = ""
-        if len(func.parameters) > 0:
-            for param in func.parameters:
-                # print param.name + " " + param.clazz + " type : " + param.annotation
-                if param.annotation == "Query" or param.annotation == "Path":
-                    hasInlineParam = True
-                    funcInlineParam += "," + param.clazz + " " + param.name
-                if param.annotation == "Body":
-                    funcBodyInlineParam = param.clazz
-            # print param.name + " " + param.clazz + " type : " + param.annotation
-            # print func.bodyparameter
-
-# print func.name + " " + func.api.method + " " + func.api.address + " " + func.response + " " + func.querypath()
-# GET FUNC
-        if intern(func.api.method) is intern("GET"):
-            if hasInlineParam == True:
-                child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response,
-                                     "[QUERY_PATH]": func.querypath(), "[FUNC_PARAM]": funcInlineParam}
-            else:
-                child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response,
-                                     "[QUERY_PATH]": func.querypath(), "[FUNC_PARAM]": ""}
-            childInsertMember(childInnerTemplate=CHILD_MANAGER_GET_FUNC_TEMPLATE,
-                              insertingModule=manager_file_path, subType=1)
-            generateApiFuncCount = generateApiFuncCount + 1
-        elif intern(func.api.method) is intern("POST"):
-            if hasInlineParam == True:
-                child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
-                ), "[FUNC_PARAM]": funcInlineParam, "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
-            else:
-                child_replacement = {"[FUNC_NAME]": func.name, "[RESULT_MODEL_NAME]": func.response, "[QUERY_PATH]": func.querypath(
-                ), "[FUNC_PARAM]": "", "[REQUEST_MODEL_NAME]": funcBodyInlineParam}
-            childInsertMember(childInnerTemplate=CHILD_MANAGER_POST_FUNC_TEMPLATE,
-                              insertingModule=manager_file_path, subType=1)
-            generateApiFuncCount = generateApiFuncCount + 1
-    return generateApiFuncCount
 
 
 def generateUnitTestFunc(Functions):
@@ -985,6 +902,7 @@ if len(sys.argv) >= 3:
     # createUnitTestModule()
 
     swaggerFunctions = getSwaggerFunctionInfo(param_url)
+    print param_url
     if swaggerFunctions.count > 0:
         runFuncSwaggerGenerator(swaggerFunctions)
     else:
@@ -995,28 +913,7 @@ else:
     showErrorMessages(
         MESSAGE.ERROR, "networking-swagger -url -package -serviceName")
     showErrorMessages(MESSAGE.ERROR, "min 3 arguments in commands")
-    '''
-
-    elif intern(param_url) is intern(sub_module_type) and len(sys.argv) == 5 and str(sys.argv[4]).lower() == "remove".lower():
-        sub_module = str(sys.argv[3])
-        child_replacement = { "[MODEL]" : parent_module , "[modelLowerCase]" : parent_module.lower(), "[SUB]" : sub_module }
-        removeChildContent(childInnerTemplate=CHILD_PROTOCOL_WIREFRAME_MODULE_METHOD_TEMPLATE, removingModule=PROTOCOLS)
-        removeChildContent(childInnerTemplate=CHILD_PROTOCOL_INNER_MODULE_TEMPLATE, removingModule=PROTOCOLS)
-
-        removeChildContent(childInnerTemplate=CHILD_WIFRAME_MODULE_METHOD_INNER_TEMPLATE, removingModule=WIREFRAME)
-        removeChildContent(childInnerTemplate=CHILD_INTERACTOR_PRESENTER_MODULE_FIELD_TEMPLATE, removingModule = INTERACTOR)
-        removeChildContent(childInnerTemplate=CHILD_INTERACTOR_INNER_MODULE_TEMPLATE, removingModule=INTERACTOR)
-        removeChildFile(module=PRESENTER,subTemplateFile=CHILD_PRESENTER_TEMPLATE,subModuleFileName=sub_module + presenter_filename)
-        removeChildFile(module=VIEW,subTemplateFile=CHILD_VIEW_TEMPLATE,subModuleFileName=sub_module + view_filename)
-
-    elif intern(param_url) is intern(sub_module_type) and len(sys.argv) != 4:
-        showErrorMessages(MESSAGE.ERROR,"viperize -typeName -parentModuleName -subModule")
-        showErrorMessages(MESSAGE.ERROR,"-subModule command has not found")
-    else:
-        showErrorMessages(MESSAGE.ERROR,"viperize -typeName -parentModuleName -subModule")
-        showErrorMessages(MESSAGE.ERROR,"-typeName command is not correct")
-        showErrorMessages(MESSAGE.ERROR,"for parent module is use to -p , for sub module is use to -s")
-'''
+   
 # os.system("rm -rf " + param)
 # showErrorMessages(MESSAGE.SUCCESS,"child")
 # os.path.isdir("/home/el")
