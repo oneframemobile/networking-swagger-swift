@@ -180,7 +180,7 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
                                     str(parameters["items"].get("type")))
                             else:
                                 requestModel = dataType
-                        # body ıse ıse formula swift param fortmatında
+                        # body ise ise formula swift param fortmatinda
                         if paramType == "body":
                             func.bodyFormula += len(func.bodyFormula) > 0 and (
                                 ","+name + " : " + requestModel) or name + " : " + requestModel
