@@ -1,7 +1,5 @@
 
 public func [FUNC_NAME]([FUNC_PARAM]success: @escaping (ResultModel<[RESULT_MODEL_NAME]>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: [FUNC_PARAM_BODY], options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.post([QUERY_PATH],bodyParameters: jsonString, success: success, fail: fail).fetch()
+        manager.post([QUERY_PATH],bodyParameters: [FUNC_PARAM_BODY], success: success, fail: fail).fetch()
 }
