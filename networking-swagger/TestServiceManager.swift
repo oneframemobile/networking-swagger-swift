@@ -1,17 +1,17 @@
 //
 //
 //  Networking-Swagger Code Generate Creater 1.0
-//  TestServiceManager.swift
+//  testServiceManager.swift
 //  Copyright © 2019 OneFrame Mobile - Koçsistem All rights reserved.
 //
  
 import Foundation
 import Networking
  
-class TestManager {
+class testManager {
     let manager : NetworkManager
     let config = NetworkConfig.shared
-    let URL = "http://petstore.swagger.io/v2/swagger.json/"
+    let URL = "/Users/a02484320/Desktop/oneframeapi.json/"
      
     let  RESULT_TAG = ["JSON_KEY"]
     let headerParamters : [String : String] = [
@@ -28,124 +28,133 @@ class TestManager {
  
     //{{request_func}}
 
-public func findPetsByTags(tags: [String], success:  @escaping (ResultModel<String>) -> Void,
+public func Get(PageSize: Int, PageIndex: Int, success:  @escaping (ResultModel<String>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
-    manager.get("/pet/findByTags?tags=\(tags)",success: success, fail: fail).fetch()
+    manager.get("/users?PageSize=\(PageSize)&PageIndex=\(PageIndex)",success: success, fail: fail).fetch()
 }
 
-public func uploadFile(petId: Int, additionalMetadata: String, file: String, success: @escaping (ResultModel<ApiResponse>) -> (),
+public func Post(user: UserPostRequest, success: @escaping (ResultModel<ApplicationUser>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: ["additionalMetadata" : "\(additionalMetadata)", "file" : "\(file)"], options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.post("/pet/\(petId)/uploadImage",bodyParameters: jsonString, success: success, fail: fail).fetch()
+        manager.post("/users",bodyParameters: user, success: success, fail: fail).fetch()
 }
 
-public func createUser(body: User, success: @escaping (ResultModel<String>) -> (),
-    fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.post("/user",bodyParameters: jsonString, success: success, fail: fail).fetch()
-}
-
-public func createUsersWithListInput(body: [User], success: @escaping (ResultModel<String>) -> (),
-    fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.post("/user/createWithList",bodyParameters: jsonString, success: success, fail: fail).fetch()
-}
-
-public func logoutUser(success:  @escaping (ResultModel<String>) -> Void,
+public func Search(Username: String, PageSize: Int, PageIndex: Int, success:  @escaping (ResultModel<ApplicationUser>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
-    manager.get("/user/logout",success: success, fail: fail).fetch()
+    manager.get("/users/search?Username=\(Username)&PageSize=\(PageSize)&PageIndex=\(PageIndex)",success: success, fail: fail).fetch()
 }
 
-public func findPetsByStatus(status: [String], success:  @escaping (ResultModel<String>) -> Void,
+public func ForgotPassword(model: ForgotPasswordRequest, success: @escaping (ResultModel<String>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        manager.post("/users/forgotpassword",bodyParameters: model, success: success, fail: fail).fetch()
+}
+
+public func GetClaimsInRole(roleName: String, success:  @escaping (ResultModel<ClaimResponse>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
-    manager.get("/pet/findByStatus?status=\(status)",success: success, fail: fail).fetch()
+    manager.get("/roles/\(roleName)/claims",success: success, fail: fail).fetch()
 }
 
-public func getUserByName(username: String, success:  @escaping (ResultModel<User>) -> Void,
+public func AddClaimToRole(roleName: String, model: RoleClaimPostRequest, success: @escaping (ResultModel<String>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        manager.post("/roles/\(roleName)/claims",bodyParameters: model, success: success, fail: fail).fetch()
+}
+
+public func GetUsersInRole(roleName: String, success:  @escaping (ResultModel<RoleUserResponse>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
-    manager.get("/user/\(username)",success: success, fail: fail).fetch()
+    manager.get("/roles/\(roleName)/users",success: success, fail: fail).fetch()
 }
 
-public func deleteUser(username: String, success: @escaping (ResultModel<String>) -> (),
-    fail: @escaping (ErrorModel) -> Void ) {
-        
-        manager.delete("/user/\(username)",bodyParameters: "", success: success, fail: fail).fetch()
-}
-
-public func updateUser(username: String, body: User, success: @escaping (ResultModel<String>) -> (),
-    fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.put("/user/\(username)",bodyParameters: jsonString, success: success, fail: fail).fetch()
-}
-
-public func getOrderById(orderId: Int, success:  @escaping (ResultModel<Order>) -> Void,
+public func Get(success:  @escaping (ResultModel<String>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
-    manager.get("/store/order/\(orderId)",success: success, fail: fail).fetch()
+    manager.get("/roles",success: success, fail: fail).fetch()
 }
 
-public func deleteOrder(orderId: Int, success: @escaping (ResultModel<String>) -> (),
+public func Post(role: RolePostRequest, success: @escaping (ResultModel<ApplicationRole>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        
-        manager.delete("/store/order/\(orderId)",bodyParameters: "", success: success, fail: fail).fetch()
+        manager.post("/roles",bodyParameters: role, success: success, fail: fail).fetch()
 }
 
-public func loginUser(username: String, password: String, success:  @escaping (ResultModel<String>) -> Void,
+public func Get(success:  @escaping (ResultModel<String>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
-    manager.get("/user/login?username=\(username)&password=\(password)",success: success, fail: fail).fetch()
+    manager.get("/menu",success: success, fail: fail).fetch()
 }
 
-public func getInventory(success:  @escaping (ResultModel<String>) -> Void,
+public func Register(model: UserPostRequest, success: @escaping (ResultModel<LoginResponse>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        manager.post("/users/register",bodyParameters: model, success: success, fail: fail).fetch()
+}
+
+public func RemoveUserFromRole(roleName: String, username: String, success: @escaping (ResultModel<String>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        manager.delete("/roles/\(roleName)/users/\(username)",bodyParameters: "", success: success, fail: fail).fetch()
+}
+
+public func AddUserToRole(roleName: String, username: String, success: @escaping (ResultModel<String>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        manager.post("/roles/\(roleName)/users/\(username)",bodyParameters: "", success: success, fail: fail).fetch()
+}
+
+public func roleget(roleName: String, success:  @escaping (ResultModel<ApplicationRole>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
-    manager.get("/store/inventory",success: success, fail: fail).fetch()
+    manager.get("/roles/\(roleName)",success: success, fail: fail).fetch()
 }
 
-public func addPet(body: Pet, success: @escaping (ResultModel<String>) -> (),
+public func Delete(roleName: String, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.post("/pet",bodyParameters: jsonString, success: success, fail: fail).fetch()
+        manager.delete("/roles/\(roleName)",bodyParameters: "", success: success, fail: fail).fetch()
 }
 
-public func updatePet(body: Pet, success: @escaping (ResultModel<String>) -> (),
+public func Patch(roleName: String, role: RolePatchRequest, success: @escaping (ResultModel<ApplicationRole>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.put("/pet",bodyParameters: jsonString, success: success, fail: fail).fetch()
+        manager.delete("/roles/\(roleName)",bodyParameters: "", success: success, fail: fail).fetch()
 }
 
-public func getPetById(petId: Int, success:  @escaping (ResultModel<Pet>) -> Void,
+public func RemoveClaimFromRole(roleName: String, claimvalue: String, success: @escaping (ResultModel<String>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        manager.delete("/roles/\(roleName)/claims/\(claimvalue)",bodyParameters: "", success: success, fail: fail).fetch()
+}
+
+public func ResetPassword(model: ResetPasswordRequest, success: @escaping (ResultModel<String>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        manager.post("/users/resetpassword",bodyParameters: model, success: success, fail: fail).fetch()
+}
+
+public func Login(model: LoginRequest, success: @escaping (ResultModel<LoginResponse>) -> (),
+    fail: @escaping (ErrorModel) -> Void ) {
+        manager.post("/users/login",bodyParameters: model, success: success, fail: fail).fetch()
+}
+
+public func UserGet(username: String, success:  @escaping (ResultModel<ApplicationUser>) -> Void,
     fail:  @escaping (ErrorModel) -> Void) {
-    manager.get("/pet/\(petId)",success: success, fail: fail).fetch()
+    manager.get("/users/\(username)",success: success, fail: fail).fetch()
 }
 
-public func deletePet(petId: Int, success: @escaping (ResultModel<String>) -> (),
+public func Delete(username: String, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        
-        manager.delete("/pet/\(petId)",bodyParameters: "", success: success, fail: fail).fetch()
+        manager.delete("/users/\(username)",bodyParameters: "", success: success, fail: fail).fetch()
 }
 
-public func updatePetWithForm(petId: Int, name: String, status: String, success: @escaping (ResultModel<String>) -> (),
+public func Patch(username: String, user: UserPatchRequest, success: @escaping (ResultModel<ApplicationUser>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: ["name" : "\(name)", "status" : "\(status)"], options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.post("/pet/\(petId)",bodyParameters: jsonString, success: success, fail: fail).fetch()
+        manager.delete("/users/\(username)",bodyParameters: "", success: success, fail: fail).fetch()
 }
 
-public func placeOrder(body: Order, success: @escaping (ResultModel<Order>) -> (),
+public func RemoveClaimFromUser(username: String, claimvalue: String, success: @escaping (ResultModel<String>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.post("/store/order",bodyParameters: jsonString, success: success, fail: fail).fetch()
+        manager.delete("/users/\(username)/claims/\(claimvalue)",bodyParameters: "", success: success, fail: fail).fetch()
 }
 
-public func createUsersWithArrayInput(body: [User], success: @escaping (ResultModel<String>) -> (),
+public func GetClaimsInUser(username: String, success:  @escaping (ResultModel<String>) -> Void,
+    fail:  @escaping (ErrorModel) -> Void) {
+    manager.get("/users/\(username)/claims",success: success, fail: fail).fetch()
+}
+
+public func AddClaimToUser(username: String, model: UserClaimPostRequest, success: @escaping (ResultModel<UserClaimPostRequest>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-        let jsonString = String(data: jsonData!, encoding: .utf8)
-        manager.post("/user/createWithArray",bodyParameters: jsonString, success: success, fail: fail).fetch()
+        manager.post("/users/\(username)/claims",bodyParameters: model, success: success, fail: fail).fetch()
+}
+
+public func Index(success:  @escaping (ResultModel<String>) -> Void,
+    fail:  @escaping (ErrorModel) -> Void) {
+    manager.get("/install",success: success, fail: fail).fetch()
 }
 }

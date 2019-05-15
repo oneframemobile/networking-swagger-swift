@@ -79,6 +79,8 @@ def make_SwaggerFunction(_path):
     return func
 
 # primitive typeları swifte uygun hale çevrilir geri kalanlar direk basılır
+
+
 def swift_TypeConverter(val):
     if val == "string" or val == "" or val == "file":
         return "String"
@@ -103,7 +105,7 @@ def arrayConverter(val):
     return "["+swift_TypeConverter(val)+"]"
 
 
-webPath = 'http://petstore.swagger.io/v2/swagger.json'
+webPath = 'https://firebasestorage.googleapis.com/v0/b/swaggercodegen.appspot.com/o/oneframeapi.json?alt=media&token=616f331e-733f-4f2c-b63d-64d77f238e73'
 # 'http://178.211.54.214:5000/swagger/v1/swagger.json'
 # swagger-codegen generate -i http://petstore.swagger.io/v2/swagger.json -l swift4
 try:
@@ -125,8 +127,6 @@ try:
             func.httpMethod = str(httpType)
             func.funcName = str(
                 jsonData["paths"][path][httpType]["operationId"])
-
-
             # request content type var mi?
             if jsonData["paths"][path][httpType].has_key('consumes'):
                 if len(jsonData["paths"][path][httpType]["consumes"]) > 0:
@@ -146,6 +146,9 @@ try:
                     required = str(parameters["required"])
                     dataType = ""
                     requestModel = ""
+
+                    if func.funcName == "RemoveClaimFromRole":
+                        print "oke"
 
                     # if we have schema property will use type and
                     if str(parameters.get("schema")) != 'None':
@@ -175,6 +178,7 @@ try:
                         else:
                             requestModel = dataType
                     if paramType == "body":
+                        func.postBodyParam = name
                         func.bodyFormula += len(func.bodyFormula) > 0 and (
                             ","+name + " : " + requestModel) or name + " : " + requestModel
                     elif paramType == "formData":
@@ -190,9 +194,16 @@ try:
                             func.queryFormula = func.path + \
                                 "?"+name+"=\("+name+")"
                     elif paramType == "path":
-                        func.pathFormula = func.path.replace(
-                            "{"+name+"}", ("\("+name+")"))
-                        func.pathFormula = "\""+func.pathFormula+"\""
+                        # Fix path double index.
+                        if func.pathFormula == "":
+                            func.pathFormula = func.path.replace(
+                                "{"+name+"}", ("\("+name+")"))
+                        else:
+                            func.pathFormula = func.pathFormula.replace(
+                                "{"+name+"}", ("\("+name+")"))
+                        # is have " character ?
+                        func.pathFormula = func.pathFormula[0] == "\"" and func.pathFormula or "\"" + \
+                            func.pathFormula+"\""
 
                     elif paramType == "header":
                         func.headerFormula += len(func.bodyFormula) > 0 and (

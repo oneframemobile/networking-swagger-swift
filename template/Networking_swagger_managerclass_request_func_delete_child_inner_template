@@ -1,6 +1,5 @@
 
 public func [FUNC_NAME]([FUNC_PARAM]success: @escaping (ResultModel<[RESULT_MODEL_NAME]>) -> (),
     fail: @escaping (ErrorModel) -> Void ) {
-        [JSON_VALUE_KEY2]
         manager.delete([QUERY_PATH],bodyParameters: [JSON_VALUE_KEY], success: success, fail: fail).fetch()
 }
