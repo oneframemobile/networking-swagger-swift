@@ -124,15 +124,20 @@ def getSwaggerFunctionInfo(swaggerWebUrl):
         for path in result["paths"]:
             pprint(result["paths"][path])
         '''
-        resp = urllib2.urlopen(swaggerWebUrl)
-        dataString = resp.read().decode('utf-8')
-        jsonData = json.loads(dataString)
-
+        jsonData = ""
+        # this control know url for localfile or apicall 
+        if swaggerWebUrl.__contains__("http"):
+            resp = urllib2.urlopen(swaggerWebUrl)
+            dataString = resp.read().decode('utf-8')
+            jsonData = json.loads(dataString)
+        else:
+            with open(swaggerWebUrl) as json_file:
+                data = json.load(json_file)
+                jsonData = data
         # pprint(json(jsonData["paths"]))
         for path in jsonData["paths"]:
             print(path)
             for httpType in jsonData["paths"][path]:
-
                 func = make_SwaggerFunction(str(path))
                 func.httpMethod = str(httpType)
                 func.funcName = str(
@@ -404,7 +409,7 @@ sub_module_type = '-s'
 
 
 # TODO CHANGE ONLINE
-CURRENT_DEV_ENV = DEV_ENV.ONLINE
+CURRENT_DEV_ENV = DEV_ENV.LOCAL
 SWIFT = ".swift"
 model_package = "//{{model_package}}"
 request_func = "//{{request_func}}"

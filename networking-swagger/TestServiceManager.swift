@@ -1,17 +1,17 @@
 //
 //
 //  Networking-Swagger Code Generate Creater 1.0
-//  TestServiceManager.swift
+//  testServiceManager.swift
 //  Copyright © 2019 OneFrame Mobile - Koçsistem All rights reserved.
 //
  
 import Foundation
 import Networking
  
-class TestManager {
+class testManager {
     let manager : NetworkManager
     let config = NetworkConfig.shared
-    let URL = "http://bit.do/eSj2S/"
+    let URL = "/Users/a02484320/Desktop/oneframeapi.json/"
      
     let  RESULT_TAG = ["JSON_KEY"]
     let headerParamters : [String : String] = [
