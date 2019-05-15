@@ -409,7 +409,7 @@ sub_module_type = '-s'
 
 
 # TODO CHANGE ONLINE
-CURRENT_DEV_ENV = DEV_ENV.LOCAL
+CURRENT_DEV_ENV = DEV_ENV.ONLINE
 SWIFT = ".swift"
 model_package = "//{{model_package}}"
 request_func = "//{{request_func}}"
